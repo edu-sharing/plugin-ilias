@@ -1,0 +1,2 @@
+edu-sharing ilias-Plugin
+===========================
