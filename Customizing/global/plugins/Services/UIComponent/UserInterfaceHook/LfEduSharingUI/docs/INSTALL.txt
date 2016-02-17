@@ -1,0 +1,18 @@
+Installing and Configuring
+
+- Important: You must install the main edu-sharing plugin "LfEduSharingResource"
+  before installing this add-on.
+- Put the directory LfEduSharingUI into your ILIAS Customizing
+  directory at:
+  Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/LfEduSharingUI
+  (create all missing subdirectories)
+- Within ILIAS open Administration > Plugins, Modules and Services
+- Click on "Administrate" in the "RepositoryObject" slot row.
+- Install/update and activate the "LfEduSharingResource" plugin
+- After activation click on "Configure" to configure the plugin.
+  
+Using
+
+After the activation and the configuration of the plugin a new block will
+appear on the personal desktop that includes links to the browse, upload and search
+features of edusharing.

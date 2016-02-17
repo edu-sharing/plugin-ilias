@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>Search-config. Is taken for applications that can act like both a client(LMS/repository) and a server application(repository)</comment>
+	<entry key="trustedclient">true</entry>
+	<entry key="type">LMS</entry>
+	<entry key="host">127.0.0.1</entry>
+	<entry key="appid">ilias.stable.demo.edu-sharing.net</entry>
+	<entry key="homerepid">local</entry>
+	<entry key="contenturl">http://127.0.0.1:8080/edu-sharing/renderingproxy</entry>
+	<entry key="cc_webservice_url">http://127.0.0.1:8080/edu-sharing/services</entry>
+	<entry key="alfresco_webservice_url">http://127.0.0.1:8080/alfresco/api</entry>
+	<entry key="cc_authentication_path">/authbyapp?wsdl</entry>
+	<entry key="cc_gui_url">http://127.0.0.1:8080/edu-sharing</entry>
+    <entry key="authenticationwebservice_wsdl">http://127.0.0.1:8080/edu-sharing/services/authbyapp?wsdl</entry>
+<entry key="public_key">-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA72e2cZt77TJhYV5Y3w8Q
+raM+NeAiEXo2PwK19iONgqzFHRMnETNNkJiGyaCl7WOO4lP9B5KpS+ZUx0GLnhy/
+mGomWYk4556a2LJrWT50rMVOVWVdYMMA7igiJkrTSQqfvH5O1k8gj60xcvWtzw3L
+1SLivKJKuP6z/t11QjOFPZxPEbjhQ7DinlrwspRYQDMthdgR47GPa/sJCtWb9V+8
+IUl+297vEs4k98SwWYa4AqsgpTcguucAO20nplW9zSDkfQSB8ckU6mdKDFLUnfv0
+7GCxt0VPs8ktQG9lx8XiixA0bxYyTwOvY+sg3auO1l5fVLX85AeSGo2aTzCcHRi4
+0QIDAQAB
+-----END PUBLIC KEY-----
+</entry><entry key="private_key">-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDvZ7Zxm3vtMmFh
+XljfDxCtoz414CIRejY/ArX2I42CrMUdEycRM02QmIbJoKXtY47iU/0HkqlL5lTH
+QYueHL+YaiZZiTjnnprYsmtZPnSsxU5VZV1gwwDuKCImStNJCp+8fk7WTyCPrTFy
+9a3PDcvVIuK8okq4/rP+3XVCM4U9nE8RuOFDsOKeWvCylFhAMy2F2BHjsY9r+wkK
+1Zv1X7whSX7b3u8SziT3xLBZhrgCqyClNyC65wA7bSemVb3NIOR9BIHxyRTqZ0oM
+UtSd+/TsYLG3RU+zyS1Ab2XHxeKLEDRvFjJPA69j6yDdq47WXl9UtfzkB5IajZpP
+MJwdGLjRAgMBAAECggEBAMclSsquQCRLqF3KkbrbWVBXXsSKMUzAkKdRpfOeF3UA
+KufIqtLQDlGdz2Gh1OTn0E/M9cp64YFVlGg7ydw4pdgvVL9eOovRj5V6tXmDTqL5
+bfPzYf2/uOJjWCTqUV+NCttNZl83ayqZM20hmPeHzmr5ngq0JdxFY406wvPSz58y
+72Pcqrlfb2CNp5cQ0lmmDCXprYGLsEurvOKBbNV7/2OZ3Vv4jcmqdUApf8nQmkdc
+FEhIvbj/EhXDwpIXL8SYcHnjkcA8hE7WUaIhhejY9ZNPo0ZLvVatbdipTMM3TEmw
+XZ5i0Q2N+8lw42uSY0yaKdGirqWN/hk52KuNn77BUAECgYEA+DoYZ9e/qKtsTs51
+XqvArbsI2yTytBHkuYqXAkFULXVbhQV6LJoDEzFG2kZTxU3LzkkwEby+zNYXZVwu
+A5N7l2cAUyIWh7lPchuY/BgVnmtH6sAdbHBMIqSyqT+4Muv3oeWCUVhCuGnhk7/x
+R/FEMCmy2DzkAjkucF13pDwTZJECgYEA9ublxe+atMYvYNv8Xn3si7hMk9bzqtZS
+Ju/YWKR4QNDjvAMu5jAGX7u3OFDYNGR8ncEwyTkKHSvK5CD5OsfCsTW0L4t3GWnY
+LyGRJE2hONzZLtkIIGlJXZpLgMKQTwNvKuCUpsoqk/Pyw0kXF2VxYnKmbTZcI7XB
+uwo+M+jBMEECgYAI5KvzLHulY17iA+uYlLa2grjygQRhBzMWoqx+XDDT4ByDS4rx
+BiOOEHnlYBeoPf1LSrv6JrT/SbxU2VSctC/9YKdWUyZTfoQmJm74uTQtFNLiyjdD
+p1JS+2ubPLkwuduJZVuh5nOdf82hKYNPfIlg4F2T+bqBieLsC605qR1YwQKBgQCM
+ZgJVCworL+NzLcUVqn+fd/67tui6xcLTd2HMDkJ/gQlvOVQq+zY0rBblBDvdlyKx
+xlDKrA/PRL7L+OAgh8VzZbl/q8ve/Kw9KNZTEX3TSuqJVErlu1lHy9yRbJIJDEfj
+1u9Q5PdPSNJMMDzcRggy1kVDJz0/5TQz+wAiHoH0wQKBgG4G/I8flQXgh/IKuZob
+7SVR/j1pIQ/GE5ZDZqflqJZuP6GzwCu96omQPp8KkE5Ui6+b0LhXjDYDk4qAlFJe
+nnyWMc9urDVWL+GoHA66tTb+dK7ndpdzh/Fw3WBtV3yQhkxmi/gwSVG3HxbYseab
+o8zvSjoEZH0rGztvFlUZNfAi
+-----END PRIVATE KEY-----
+</entry>
+</properties>

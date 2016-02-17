@@ -1,0 +1,53 @@
+// 
+// English Language File for ExampleObject Plugin
+//
+
+<!-- language file start -->
+obj_xesr#:#edu-sharing Resource
+objs_xesr#:#edu-sharing Resources
+obj_xesr_duplicate#:#Copy
+objs_xesr_duplicate#:#Copy edu-sharing Resource
+obj_xesr_select#:#Select edu-sharing Resource
+xesr_add#:#Add edu-sharing Resource
+xesr_new#:#Add New edu-sharing Resource
+xesr_read#:#Read access to edu-sharing Resource
+xesr_write#:#Edit edu-sharing Resource
+xesr_delete#:#Delete edu-sharing Resource
+xesr_visible#:#edu-sharing Resource is visible
+xesr_edit_permission#:#Change permission settings
+crs_create_xesr#:#Create edu-sharing Resource
+grp_create_xesr#:#Create edu-sharing Resource
+fold_create_xesr#:#Create edu-sharing Resource
+root_create_xesr#:#Create edu-sharing Resource
+cat_create_xesr#:#Create edu-sharing Resource
+content#:#Content
+properties#:#Properties
+edit_properties#:#Edit Properties
+title#:#Title
+description#:#Description
+option_one#:#Option One
+option_two#:#Option Two
+save#:#Save
+cancel#:#Cancel
+edit#:#Edit
+status#:#Status
+offline#:#Offline
+select_resource#:#Select Resource
+browse#:#Browse
+search#:#Search
+uri#:#URI
+configuration_saved#:#Configuration saved.
+edus_configuration#:#edu-sharing Configuration
+show_block#:#Show Block
+config_dir#:#Config Directory
+config#:#Configuration
+config_dir_read#:#Config Directory Readable
+yes#:#Yes
+no#:#No
+save#:#Save
+settings#:#Settings
+show_configuration#:#Show Configuration
+not_usable_no_course#:#Please note that edu-sharing resources may only used in courses. This instance is not running inside a course.
+usage_not_registered#:#The usage of this object within this course is not registered yet. To use it in this place, please register the usage.
+register_usage#:#Register Usage
+upload#:#Upload

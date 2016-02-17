@@ -1,0 +1,10 @@
+//
+// Copyright (c) 2012 Leifos GmbH, GPL
+//
+
+<!-- language file start -->
+edu_sharing#:#EduSharing
+edus_configuration#:#Edusharing Configuration
+show_block#:#Show Block
+main_plugin_missing#:#Main Plugin "LfEduSharingResource" missing or not activated. This plugin will not work without it.
+role_activation#:#Role Activation
