@@ -128,7 +128,7 @@ class lfEduUtil
 		$url.= '?app_id='.urlencode($app_id);
 
 		// problem: esrender does not allow many necessary characters
-		$sess_id = session_id()."::".CLIENT_ID;
+		$sess_id = session_id();
 		$url.= '&session='.urlencode($sess_id);
 
 		$rep_id = $home_app_conf->getEntry("homerepid");
@@ -147,8 +147,8 @@ class lfEduUtil
 		$url.= '&resource_id='.$a_obj->getRefId();
 		$url.= '&course_id='.$a_obj->getUpperCourse();
 
-        $ES_KEY = 'thetestkey';
-        $ES_IV = 'initvect';
+        $ES_KEY = $home_app_conf->getEntry("encrypt_key");
+        $ES_IV = $home_app_conf->getEntry("encrypt_initvector");
 		$url.= '&u=' . urlencode(base64_encode(mcrypt_cbc(MCRYPT_BLOWFISH, $ES_KEY, $ilUser->getEmail(), MCRYPT_ENCRYPT, $ES_IV)));
         
         $ts = round(microtime(true) * 1000);

@@ -61,8 +61,6 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 				break;
 			
 			case "showContent":			// list all commands that need read permission here
-			//case "...":
-			//case "...":
 				$this->checkPermission("read");
 				$this->$cmd();
 				break;
@@ -128,8 +126,6 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		if ($this->object->getUri() == "")
 		{
 			$ilToolbar->addText($this->plugin->txt("select_resource"));
-//			$ilToolbar->addFormButton($this->plugin->txt("browse"), "browseResource");
-//			$ilToolbar->addSeparator();
 			include_once("./Services/Form/classes/class.ilTextInputGUI.php");
 			$ti = new ilTextInputGUI("", "edus_svalue");
 			$ti->setMaxLength(200);

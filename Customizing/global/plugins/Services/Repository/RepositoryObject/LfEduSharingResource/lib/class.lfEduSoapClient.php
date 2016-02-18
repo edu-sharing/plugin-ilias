@@ -23,8 +23,6 @@
 /* Rewritten based on edu sharing CCWebServiceFactory class, Leifos GmbH, 8.5.2012 */
 
 
-require_once 'Alfresco/Service/WebService/WebServiceFactory.php';
-
 /**
  * Edusharing soap client. Like the moodle plugin, which uses the
  * cclib class CCWebServiceFactory, we are using the Alfresco service classes
@@ -117,71 +115,7 @@ class lfEduSoapClient
 		}
 	}
 	
-	/**
-	 * Authenticate by app
-	 *
-	 * @param
-	 * @return
-	 */
-	/*
-	function authenticateByTrustedApp($a_app_conf, $a_create_user_if_home_rep = false)
-	{
-		global $ilUser, $ilLog;
-		
-		// get home app conf
-		$conf = $this->plugin->includeClass("../lib/class.lfEduAppConf.php");
-		lfEduAppConf::initApps();
-		$home_conf = lfEduAppConf::getHomeAppConf();
-		
-		$create_user = false;
-		if ($a_create_user_if_home_rep)
-		{
-			if ($home_conf->getEntry("homerepid") == $a_app_conf->getEntry("appid"))
-			{
-				$create_user = true;
-			}
-		}
 
-		if ($home_conf == null)
-		{
-			include_once("class.ilLfEduSharingLibException.php");
-			throw new ilLfEduSharingLibException('Missing home-config.');
-		}
-
-		try
-		{
-			$wsdl = $a_app_conf->getEntry('authenticationwebservice_wsdl');
-			if (!$wsdl)
-			{
-				include_once("class.ilLfEduSharingLibException.php");
-				throw new ilLfEduSharingLibException('No url for authentication-webservice (entry: "authenticationwebservice_wsdl") configured.');
-			}
-			
-			
-       		 $params = array("applicationId" => $home_conf->getEntry('appid'),
-       		 		"ticket" => session_id()."::".CLIENT_ID,
-       		 		"ssoData" => array(array('key' => 'userid','value' => $ilUser->getEmail())));
-			
-			
-			$ilLog->write("B. Calling authenticateByTrustedApp() with: ".print_r($params, true));
-			
-			require_once 'class.lfSigSoapClient.php';
-			$service = new SigSoapClient($wsdl, array());
-
-			$alfReturn = $service->authenticateByTrustedApp($params);
-
-			$ticket = $alfReturn->authenticateByTrustedAppReturn->ticket;
-		}
-		catch(Exception $exception)
-		{
-			throw $exception;
-		}
-
-		return $ticket;
-	}*/
-	
-
-	
 	
 	/**
 	 * Delete usage
@@ -394,7 +328,7 @@ class lfEduSoapClient
 			
 			
 			
-$ilLog->write("Calling setUsage() with: ".print_r($params, true));
+			$ilLog->write("Calling setUsage() with: ".print_r($params, true));
 
 			$soap->setUsage($params);
 			

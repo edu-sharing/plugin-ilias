@@ -23,43 +23,6 @@ class ilLfEduSharingUIUIHookGUI extends ilUIHookPluginGUI
 	{
 		global $ilUser, $rbacreview;
 
-/*                
-		if ($a_comp == "Services/MainMenu" && $a_part == "main_menu_list_entries")
-                {
-// error_log( print_r($a_par, true) );
-		}
-
-		// add something to the main menu entries
-		if ($a_comp == "Services/MainMenu" && $a_part == "main_menu_list_entries")
-		{
-			// $a_par["main_menu_gui"] is ilMainMenu object
-			global $ilUser;
-
-			include_once( dirname(__FILE__) . '/../../../../Repository/RepositoryObject/LfEduSharingResource/classes/class.ilObjLfEduSharingResource.php');
-
-			$Resource = new ilObjLfEduSharingResource();
-			$Ticket = $Resource->getTicket();
-
-					$edu_locale = 'en_EN';
-			switch( strtolower($ilUser->getLanguage()) )
-			{
-				case 'de':
-					$edu_locale = 'de_DE';
-					break;
-				default:
-					error_log('Unhandled language-code', E_WARNING);
-			}
-
-			$template = new ilTemplate("tpl.main_menu_list_entries.html", true, true, "Services/MainMenu");
-
-			$url = "http://stable.demo.edu-sharing.net/edu-sharing?mode=1&user=".urlencode($ilUser->getEmail())."&ticket=".urlencode($Ticket);
-error_log($template->get());
-
-			return array("mode" => ilUIHookPluginGUI::APPEND, "html" => $template->get());
-		}
-*/
-
-
 		// if we are on the personal desktop and the left column is rendered
 		if (/*1 ||*/ $a_comp == "Services/PersonalDesktop" && $a_part == "right_column")
 		{
@@ -109,16 +72,10 @@ error_log($template->get());
 		
 		$pl = $this->getPluginObject();
 		$settings = new ilSetting("xedus");
-		
-/*		if (!$settings->get("show_block"))
-		{
-			return;
-		}*/
-		
-		
+
 
 		$btpl = $pl->getTemplate("tpl.edus_block.html");
-//var_dump($btpl);die();
+
 		// output text from lang file
 		$btpl->setVariable("TITLE", "EduSharing");
 		
@@ -212,7 +169,7 @@ error_log($template->get());
 		$link = $a_base_url;
 		$link .= '?mode=0';		// mode=2 (upload)
 
-// todo: what if no email given!?
+        // todo: what if no email given!?
 		$user = $ilUser->getEmail();
 		$link .= '&user='.urlencode($user);
 
