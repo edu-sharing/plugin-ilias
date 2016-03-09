@@ -220,7 +220,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin
 		$hc = $this->getHomeAppConf();
 		$authWsdl = $hc -> getEntry('authenticationwebservice_wsdl');
 		$eduService = new SigSoapClient($authWsdl);
-		$params = array("applicationId" => $hc -> getEntry('appid'),
+		$params = array("applicationId" => $hc -> getEntry('appid'), "ticket" => session_id(),
 					"ssoData" => array(array('key' => 'userid','value' => $ilUser->getEmail())));
 		$ilLog->write("(B) Calling authenticateByTrustedApp() with: ".print_r($params, true));
 		$eduReturn = $eduService->authenticateByTrustedApp($params);
