@@ -1,0 +1,20 @@
+Installing and Configuring
+
+- Put the directory LfEduSharingResource into your ILIAS Customizing
+  directory at:
+  Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource
+  (create all missing subdirectories)
+- Create a configuation directory on your server and put all edusharing
+  configuration files into this directory. The directory must be readable
+  for your web server.
+- Within ILIAS open Administration > Plugins, Modules and Services
+- Click on "Administrate" in the "RepositoryObject" slot row.
+- Install/update and activate the "LfEduSharingResource" plugin
+- After activation click on "Configure" and enter your configuration directory
+  path and hit "Save".
+  
+Using
+
+After the activation and the configuration of the plugin a new type of
+repository objects called "Edusharing Resource" can be added to the ILIAS
+repository.

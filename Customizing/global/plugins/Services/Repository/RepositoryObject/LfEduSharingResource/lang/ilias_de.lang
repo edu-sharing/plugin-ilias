@@ -1,0 +1,53 @@
+// 
+// English Language File for ExampleObject Plugin
+//
+
+<!-- language file start -->
+obj_xesr#:#edu-sharing-Ressource
+objs_xesr#:#edu-sharing-Ressourcen
+obj_xesr_duplicate#:#Kopieren
+objs_xesr_duplicate#:#Kopiere edu-sharing-Ressource
+obj_xesr_select#:#edu-sharing-Ressource auswählen
+xesr_add#:#edu-sharing-Ressource hinzufügen
+xesr_new#:#Neue edu-sharing-Ressource
+xesr_read#:#Lesezugriff auf edu-sharing-Ressource
+xesr_write#:#Schreibzugriff auf edu-sharing-Ressource
+xesr_delete#:#edu-sharing-Ressource löschen
+xesr_visible#:#edu-sharing-Ressource ist sichtbar
+xesr_edit_permission#:#Rechteeinstellungen ändern
+crs_create_xesr#:#edu-sharing-Ressource erstellen
+grp_create_xesr#:#edu-sharing-Ressource erstellen
+fold_create_xesr#:#edu-sharing-Ressource erstellen
+root_create_xesr#:#edu-sharing-Ressource erstellen
+cat_create_xesr#:#edu-sharing-Ressource erstellen
+content#:#Inhalt
+properties#:#Einstellungen
+edit_properties#:#Einstellungen ändern
+title#:#Titel
+description#:#Beschreibung
+option_one#:#Einstellung eins
+option_two#:#Einstellung zwei
+save#:#Speichern
+cancel#:#Abbrechen
+edit#:#Editieren
+status#:#Status
+offline#:#Offline
+select_resource#:#Ressource auswählen
+browse#:#Browsen
+search#:#Suchen
+uri#:#URI
+configuration_saved#:#Konfiguration gespeichert
+edus_configuration#:#edu-sharing Konfiguration
+show_block#:#Block anzeigen
+config_dir#:#Config Verzeichnis
+config#:#Konfiguration
+config_dir_read#:#Config Verzeichnis lesbar
+yes#:#Ja
+no#:#Nein
+save#:#Speichern
+settings#:#Einstellungen
+show_configuration#:#Konfiguration anzeigen
+not_usable_no_course#:#edu-sharing Ressourcen können nur innerhalb von Kursen genutzt werden. Dieses Objekt befindet sich zur Zeit nicht in einem Kurs.
+usage_not_registered#:#Die Nutzung des Objektes innerhalb dieses Kurses wurde noch nicht registriert.
+register_usage#:#Nutzung registrieren
+upload#:#Hochladen
