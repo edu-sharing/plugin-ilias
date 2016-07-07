@@ -25,3 +25,7 @@ Plugin registration
   - homeApplication.properties.xml
 - Change the ssl keypair in homeApplication.properties.xml. You really should do this to avoid a security gap.
 - Register the plugin in home repository
+
+Contributing
+------------
+If you plan to contribute on a regular basis, please visit our [community site](http://edu-sharing-network.org/?lang=en).
