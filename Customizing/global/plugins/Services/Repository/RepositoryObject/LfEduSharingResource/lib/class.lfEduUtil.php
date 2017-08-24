@@ -33,7 +33,7 @@ class lfEduUtil
 		switch ($a_cmd)
 		{
 			case "search":
-				$mode = 0;
+				$path = '/components/search';
 				if ($a_search_text != "")
 				{
 					$pars["p_startsearch"] = 1;
@@ -41,18 +41,8 @@ class lfEduUtil
 				}
 				break;
 				
-			// is browse = workspace!?
-			case "browse":
-				$mode = 1;
-				break;
-				
-			case "upload":
-				$mode = 2;
-				break;
-
-			case "workspace":
-				$mode = 1;
-				break;
+			default:
+                $path = '/components/workspace';
 		}
 		
 		if ($a_re_url != "")
@@ -61,11 +51,11 @@ class lfEduUtil
 		}
 		
 		// build link to search
-		$link .= '?mode='.$mode;
+		$link .= $path;
 
-// todo: what if no email given!?
+		// todo: what if no email given!?
 		$user = $ilUser->getEmail();
-		$link .= '&user='.urlencode($user);
+		$link .= '?user='.urlencode($user);
 
 		// add ticket
 		$link .= '&ticket='.urlencode($a_ticket);
@@ -164,7 +154,7 @@ class lfEduUtil
         
         $url .= '&sig=' . urlencode($signature);
         $url .= '&signed=' . $app_id . $ts;
-        //echo $url;die();
+
 		return $url;
 	}
 	
