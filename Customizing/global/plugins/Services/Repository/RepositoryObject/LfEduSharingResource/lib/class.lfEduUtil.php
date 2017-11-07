@@ -145,7 +145,7 @@ class lfEduUtil
         $url .= '&ts=' . $ts;
         $url .= '&display=window';
         
-        $data = $app_id . $ts;
+        $data = $app_id . $ts . $res_ref;
         $priv_key = $home_app_conf->getEntry('private_key');
         $pkeyid = openssl_get_privatekey($priv_key);      
         openssl_sign($data, $signature, $pkeyid);
@@ -153,7 +153,7 @@ class lfEduUtil
         openssl_free_key($pkeyid);    
         
         $url .= '&sig=' . urlencode($signature);
-        $url .= '&signed=' . $app_id . $ts;
+        $url .= '&signed=' . $data;
 
 		return $url;
 	}
