@@ -178,6 +178,7 @@ class ilLfEduSharingUIUIHookGUI extends ilUIHookPluginGUI
 
 		// add language
 		$link .= '&locale='.urlencode($ilUser->getLanguage());
+        $link .= '&language='.urlencode($ilUser->getLanguage());
 
 		if (is_array($a_pars))
 		{
