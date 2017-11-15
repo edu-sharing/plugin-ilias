@@ -24,6 +24,7 @@ Plugin registration
   - app-[home repository app id].properties.xml
   - homeApplication.properties.xml
 - Change the ssl keypair in homeApplication.properties.xml. You really should do this to avoid a security gap.
+- Add the ssl public key of the home repository
 - Register the plugin in home repository
 
 Contributing
