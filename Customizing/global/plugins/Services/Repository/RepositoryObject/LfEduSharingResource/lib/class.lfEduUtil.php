@@ -156,6 +156,24 @@ class lfEduUtil
         $url .= '&sig=' . urlencode($signature);
         $url .= '&signed=' . $data;
 
+
+        $ticket = $a_obj->getTicket();
+        $repoPublicKey = $home_app_conf->getEntry('repo_public_key');
+        if(empty($repoPublicKey)) {
+            include_once("class.ilLfEduSharingLibException.php");
+            throw new ilLfEduSharingLibException('Error fetching repository public key.');
+        }
+
+        $encryptedTicket = '';
+        $key = openssl_get_publickey($repoPublicKey);
+        openssl_public_encrypt($ticket ,$encryptedTicket, $key);
+        if($encryptedTicket === false) {
+            include_once("class.ilLfEduSharingLibException.php");
+            throw new ilLfEduSharingLibException('Error encryting ticket.');
+        }
+
+        $url .= '&ticket=' . $encryptedTicket;
+
 		return $url;
 	}
 	

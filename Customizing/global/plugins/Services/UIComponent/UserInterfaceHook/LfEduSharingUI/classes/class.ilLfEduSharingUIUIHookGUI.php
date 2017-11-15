@@ -134,9 +134,10 @@ class ilLfEduSharingUIUIHookGUI extends ilUIHookPluginGUI
 					$url = lfEduUtil::buildUrl($home_app_conf, "search", $ticket, $stext, "");
 					ilUtil::redirect($url);
 					break;
-					
+
+					//not supported anymore
 				case "upload":
-					$url = lfEduUtil::buildUrl($home_app_conf, "upload", $ticket, "", "");
+					$url = lfEduUtil::buildUrl($home_app_conf, "workspace", $ticket, "", "");
 					ilUtil::redirect($url);
 					break;
 					
@@ -167,7 +168,7 @@ class ilLfEduSharingUIUIHookGUI extends ilUIHookPluginGUI
 		
 		// build link to search
 		$link = $a_base_url;
-		$link .= '?mode=0';		// mode=2 (upload)
+		$link .= '/components/' . $a_mode;
 
         // todo: what if no email given!?
 		$user = $ilUser->getEmail();
