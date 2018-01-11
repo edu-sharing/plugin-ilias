@@ -115,6 +115,7 @@ class lfEduUtil
         $home_app_conf = $a_obj -> getHomeAppConf();
         $url = $home_app_conf->getEntry("contenturl");
         $app_id = $home_app_conf->getEntry('appid');
+        $repoPublicKey = $home_app_conf->getEntry('repo_public_key');
 
         $url.= '?app_id='.urlencode($app_id);
 
@@ -140,7 +141,8 @@ class lfEduUtil
 
         $ES_KEY = $home_app_conf->getEntry("encrypt_key");
         $ES_IV = $home_app_conf->getEntry("encrypt_initvector");
-        $url.= '&u=' . urlencode(base64_encode(mcrypt_cbc(MCRYPT_BLOWFISH, $ES_KEY, $ilUser->getEmail(), MCRYPT_ENCRYPT, $ES_IV)));
+
+        $url.= '&u=' . urlencode(base64_encode(self::open_ssl_public_encrypt($repoPublicKey, $ilUser->getEmail())));
 
         $ts = round(microtime(true) * 1000);
         $url .= '&ts=' . $ts;
@@ -156,27 +158,23 @@ class lfEduUtil
         $url .= '&sig=' . urlencode($signature);
         $url .= '&signed=' . $data;
 
-
         $ticket = $a_obj->getTicket();
-        $repoPublicKey = $home_app_conf->getEntry('repo_public_key');
-        if(empty($repoPublicKey)) {
-            include_once("class.ilLfEduSharingLibException.php");
-            throw new ilLfEduSharingLibException('Error fetching repository public key.');
-        }
-
-        $encryptedTicket = '';
-        $key = openssl_get_publickey($repoPublicKey);
-        openssl_public_encrypt($ticket ,$encryptedTicket, $key);
-        if($encryptedTicket === false) {
-            include_once("class.ilLfEduSharingLibException.php");
-            throw new ilLfEduSharingLibException('Error encryting ticket.');
-        }
-
-        $url .= '&ticket=' . urlencode(base64_encode($encryptedTicket));
+        $url .= '&ticket=' . urlencode(base64_encode(self::open_ssl_public_encrypt($repoPublicKey, $ticket)));
 
         $url .= '&closeOnBack=true';
 
         return $url;
+    }
+
+    static function open_ssl_public_encrypt($pubKeyRaw, $data) {
+        $dataEncrypted = '';
+        $key = openssl_get_publickey($pubKeyRaw);
+        openssl_public_encrypt($data ,$dataEncrypted, $key);
+        if($dataEncrypted === false) {
+            include_once("class.ilLfEduSharingLibException.php");
+            throw new ilLfEduSharingLibException('Encryption error.');
+        }
+        return $dataEncrypted;
     }
 
     /**
