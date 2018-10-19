@@ -19,6 +19,13 @@
 /Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/*
 !/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/LfEduSharingUI
 
+!/Customizing/global/plugins/Services/COPage
+/Customizing/global/plugins/Services/COPage/*
+!/Customizing/global/plugins/Services/COPage/PageComponent
+/Customizing/global/plugins/Services/COPage/PageComponent/*
+!/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent
+
+
 !LICENSE
 !README.md
 
