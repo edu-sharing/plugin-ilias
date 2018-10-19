@@ -1,19 +1,20 @@
 <div id="block_edus_0">
-<table class="il_Block" datatable="0">
-<tr><td class="ilBlockHeader" colspan="1">
-<div style="float:left;">
-<h3 class="ilBlockHeader"><a class="ilAccAnchor" name="block_edus_0_blhead" id="block_edus_0_blhead">{TITLE}</a><span class="ilAccHidden"> (Block)</span></h3>
-</div>
-</td>
-</tr>
-<tr class="ilBlockRow1">
-<td class="std small">
-	<p><a href="{HREF_WORKSPACE}" target="_blank">» Zum Workspace</a></p>
-	<p><a href="{HREF_UPLOAD}" target="_blank">» Zum Upload</a></p>
-	<form action="{FORM_ACTION}" method="post" target="_blank">
-	<p><input type="text" name="edus_svalue" size="15" /> <input type="submit" class="submit" value="Suche"/><p>
-	</form>
-</td>
-</tr>
-</table>
+	<div class="il_Block" datatable="0">
+		<div class="ilBlockHeader">
+			<h3 class="ilBlockHeader"><a class="ilAccAnchor" name="block_edus_0_blhead" id="block_edus_0_blhead">{TITLE}</a><span class="ilAccHidden"> (Block)</span></h3>
+		</div>
+		<div class="ilBlockContent">
+			<div class="small">
+			<!-- BEGIN edu_sharing_available -->
+				<p><a href="{HREF_WORKSPACE}" target="_blank">{WORKSPACE}</a></p>
+				<form action="{FORM_ACTION}" method="post" target="_blank">
+					<p><input type="text" name="edus_svalue" size="15" /> <input type="submit" class="submit" value="{SEARCH}"/><p>
+				</form>
+			<!-- END edu_sharing_available -->
+			<!-- BEGIN edu_sharing_not_available -->
+				<p class="error">{NOT_AVAILABLE}</p>
+			<!-- END edu_sharing_not_available -->
+			</div>
+		</div>
+	</div>
 </div>

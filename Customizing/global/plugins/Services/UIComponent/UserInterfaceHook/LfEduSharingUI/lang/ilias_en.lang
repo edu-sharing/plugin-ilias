@@ -1,10 +1,15 @@
 //
-// Copyright (c) 2012 Leifos GmbH, GPL
+// English language file
 //
 
 <!-- language file start -->
-edu_sharing#:#EduSharing
-edus_configuration#:#Edusharing Configuration
+edu_sharing#:#edu-sharing
+edus_configuration#:#edu-sharing Configuration
 show_block#:#Show Block
 main_plugin_missing#:#Main Plugin "LfEduSharingResource" missing or not activated. This plugin will not work without it.
 role_activation#:#Role Activation
+save#:#save
+configuration_saved#:#saved
+workspace#:#» To your Workspace
+search#:#Search
+not_available#:#Currently not available!

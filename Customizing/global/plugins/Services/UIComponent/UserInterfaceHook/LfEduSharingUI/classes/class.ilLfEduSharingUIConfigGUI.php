@@ -8,6 +8,7 @@ include_once("./Services/Component/classes/class.ilPluginConfigGUI.php");
  * Edu Sharing configuration user interface class
  *
  * @author Alex Killing <killing@leifos.de>
+ * @author Uwe Kohnle <kohnle@internetlehrer-gmbh.de>
  *
  * @version $Id$
  */
@@ -31,7 +32,7 @@ class ilLfEduSharingUIConfigGUI extends ilPluginConfigGUI
 	 */
 	function configure()
 	{
-		global $tpl;
+		global $DIC;
 		
 		$pl = $this->getPluginObject();
 		if (!$pl->checkMainPlugin())
@@ -40,13 +41,9 @@ class ilLfEduSharingUIConfigGUI extends ilPluginConfigGUI
 		}
 
 		$form = $this->initConfigurationForm();
-		$tpl->setContent($form->getHTML());
+		$DIC->ui()->mainTemplate()->setContent($form->getHTML());
 	}
 	
-	//
-	// From here on, this is just an example implementation using
-	// a standard form (without saving anything)
-	//
 	
 	/**
 	 * Init configuration form.
@@ -106,7 +103,7 @@ class ilLfEduSharingUIConfigGUI extends ilPluginConfigGUI
 	 */
 	public function save()
 	{
-		global $tpl, $ilCtrl, $rbacreview;
+		global $DIC, $rbacreview;
 
 		$pl = $this->getPluginObject();
 		
@@ -133,12 +130,12 @@ class ilLfEduSharingUIConfigGUI extends ilPluginConfigGUI
 			$settings->set("activated_roles", implode($roles, ","));
 			
 			ilUtil::sendSuccess($pl->txt("configuration_saved"), true);
-			$ilCtrl->redirect($this, "configure");
+			$DIC->ctrl()->redirect($this, "configure");
 		}
 		else
 		{
 			$form->setValuesByPost();
-			$tpl->setContent($form->getHtml());
+			$DIC->ui()->mainTemplate()->setContent($form->getHtml());
 		}
 	}
 	

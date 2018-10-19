@@ -1,3 +1,19 @@
+Installation und Konfiguration des Plugins 'LfEduSharingUI'
+
+Wichtig: Um das Plugin 'LfEduSharingUI' nutzen zu können, müssen Sie zuvor das Plugin 'LfEduSharingResource' installiert und konfiguriert haben.
+
+- Kopieren Sie Dateien und Verzeichnisse in das ILIAS-Customizing-Verzeichnis in:
+  Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/LfEduSharingUI
+  (erstellen Sie die fehlenden Verzeichnisse)
+- Öffnen Sie in ILIAS Administration > Plugins
+- Klicken Sie beim Plugin 'LfEduSharingUI' auf 'Aktionen' und dann auf 'Installieren'
+- Klicken Sie dann an gleicher Stelle auf 'Aktivieren'
+- Führen Sie ggf. 'Sprachen neu laden' aus
+- Wählen Sie dann 'Konfigurieren'
+- Aktivieren Sie bei der Konfiguration 'Block anzeigen' und die gewünschten Rollen. Klicken Sie dann auf 'speichern'.
+
+Danach steht Ihnen bei Ihrem 'Persönlichen Schreibtisch' ein Block rechts oben für 'edu-sharing' zur Verfügung.
+
 Installing and Configuring
 
 - Important: You must install the main edu-sharing plugin "LfEduSharingResource"
