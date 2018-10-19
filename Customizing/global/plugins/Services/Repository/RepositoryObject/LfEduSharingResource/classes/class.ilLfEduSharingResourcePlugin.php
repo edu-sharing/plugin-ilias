@@ -13,9 +13,23 @@ include_once("./Services/Repository/classes/class.ilRepositoryObjectPlugin.php")
 */
 class ilLfEduSharingResourcePlugin extends ilRepositoryObjectPlugin
 {
-	function getPluginName()
-	{
+	const ID = "xesr";
+	protected static $instance = NULL;
+	
+	function getPluginName() {
 		return "LfEduSharingResource";
+	}
+	
+	public static function getInstance() {
+		if (self::$instance === NULL) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	
+	protected function uninstallCustom() {
+		// TODO: Nothing to do here.
 	}
 }
 ?>

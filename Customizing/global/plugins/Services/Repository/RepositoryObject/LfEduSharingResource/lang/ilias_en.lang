@@ -1,5 +1,5 @@
 // 
-// English Language File for ExampleObject Plugin
+// English Language File
 //
 
 <!-- language file start -->
@@ -51,3 +51,70 @@ not_usable_no_course#:#Please note that edu-sharing resources may only used in c
 usage_not_registered#:#The usage of this object within this course is not registered yet. To use it in this place, please register the usage.
 register_usage#:#Register Usage
 upload#:#Upload
+generate_ssl_keys_failed#:#Generating of SSL keys failed. Please check your configuration.
+application_properties#:#Application properties (application_)
+application_appid#:#appid
+application_type#:#type
+application_homerepid#:#homerepid
+application_cc_gui_url#:#cc_gui_url
+application_private_key#:#private_key
+application_public_key#:#public_key
+application_blowfishkey#:#blowfishkey
+application_blowfishiv#:#blowfishiv
+repository_properties#:#Repository properties (repository_)
+repository_public_key#:#public key
+repository_clientport#:#clientport
+repository_port#:#port
+repository_domain#:#domain
+repository_authenticationwebservice_wsdl#:#authenticationwebservice wsdl
+repository_type#:#type
+repository_appid#:#appid
+repository_usagewebservice_wsdl#:#usagewebservice_wsdl
+repository_protocol#:#protocol
+repository_host#:#host
+repository_version#:#version
+repository_version_info#:#Standard: 4 (ZOERR: 4.1)
+authentication_properties#:#Authentication properties (EDU_AUTH_)
+edu_auth_key#:#Key to identify user
+edu_auth_id#:#User name
+edu_auth_id_info#:#User name as used for login on ILIAS (not recommended) 
+edu_auth_idnumber#:#User-Id
+edu_auth_idnumber_info#:#ILIAS-User-Id (recommended restrictively)
+edu_auth_email#:#E-Mail
+edu_auth_email_info#:#first email adress of user (recommended restrictively)
+edu_auth_username#:#First and last name of user
+edu_auth_username_info#:#First and last name of user (not recommended)
+edu_auth_idnumber_http_path_client_id#:#Combination of user-id, URL and client 
+edu_auth_idnumber_http_path_client_id_info#:#Combination of user-id with adress (URL) of ILIAS-Installation and statement of client i.e.
+edu_auth_shibbolethuid#:#Shibboleth-UId
+edu_auth_shibbolethuid_info#:#Shibboleth-UId
+edu_auth_zoerr_auth#:#ZOERR-authentication
+edu_auth_zoerr_auth_info#:#ZOERR-special, on Shibboleth building authentication
+edu_auth_param_name_userid#:#PARAM_NAME_USERID
+edu_auth_param_name_userid_info#:#Standard: username
+edu_auth_param_name_lastname#:#PARAM_NAME_LASTNAME
+edu_auth_param_name_lastname_info#:#Standard: lastname
+edu_auth_param_name_firstname#:#PARAM_NAME_FIRSTNAME
+edu_auth_param_name_firstname_info#:#Standard: firstname
+edu_auth_param_name_email#:#PARAM_NAME_EMAIL
+edu_auth_param_name_email_info#:#Standard: email
+edu_auth_affiliation#:#AFFILIATION
+edu_auth_affiliation_info#:#Standard:
+edu_auth_affiliation_name#:#AFFILIATION_NAME
+edu_auth_affiliation_name_info#:#Standard:
+edu_auth_conveyglobalgroups#:#CONVEYGLOBALGROUPS
+edu_auth_conveyglobalgroups_info#:#Standard: no 
+guest_properties#:#Guest properties (edu_guest_)
+edu_guest_option#:#Guest access for everyone
+edu_guest_option_info#:#Standard: no; Activate this option, if the (common) authentication with a central edu-sharing repository is not clarified yet or if data protection requirements do not allow the transfer of i.e. user-id or a last name towards the edu-sharing repository. ILIAS-Users with the global roles 'Anonymous' always receive a guest access only for the edu-sharing repository. 
+edu_guest_guest_id#:#guest_id
+edu_guest_guest_id_info#:#Standard: esguest
+import_metadata#:#Connect with home-repository 
+import_application_metadata#:#Connect with home-repository (Attention: configuration data will be overwritten) 
+metadata_endpoint#:# Metadata endpoint
+metadata_endpoint_info#:#example: http://edu-sharing-server/edu-sharing/metadata?format=lms
+metadata_import#:#Import metadata
+object_version_use_exact#:#No update of this version 
+object_version_use_exact_info#:#The resource remains in version 
+not_visible_now#:#The resource cannot be displayed temporarily. 
+no_resource_set#:#No resource was set. The settings for this object should be checked.

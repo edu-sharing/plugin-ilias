@@ -72,8 +72,6 @@ class ilObjLfEduSharingResourceListGUI extends ilObjectPluginListGUI
 	*/
 	function getProperties()
 	{
-		global $lng, $ilUser;
-
 		$props = array();
 
 		return $props;

@@ -1,15 +1,31 @@
+Installation und Konfiguration des Plugins 'LfEduSharingResource'
+
+- Kopieren Sie Dateien und Verzeichnisse in das ILIAS-Customizing-Verzeichnis in:   Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource (erstellen Sie die fehlenden Verzeichnisse)
+- Öffnen Sie in ILIAS Administration > Plugins
+- Klicken Sie beim Plugin 'LfEduSharingResource' auf 'Aktionen' und dann auf 'Installieren'
+- Klicken Sie dann an gleicher Stelle auf 'Aktivieren'
+- Führen Sie ggf. 'Sprachen neu laden' aus
+- Wählen Sie dann 'Konfigurieren'
+- Klicken Sie bei der Konfiguration auf 'Mit Heimat-Repositorium verbinden'. 
+  Geben Sie den 'endpoint' ein und klicken Sie auf 'Metadaten importieren'.
+  Unter 'Einstellungen' können Sie dann weitere Einstellungen vornehmen. 
+  Wählen Sie einen eindeutigen 'Key' unter 'Authentication properties'
+  (z.B. email). Mit diesem Key wird der Benutzer bei edu-sharing angemeldet.
+
+Nach Aktivierung und Konfiguration sollten Sie sich den Rechten zuwenden. Damit z.B. in neu erstellten Kursen edu-sharing-Ressourcen genutzt werden können, ändern Sie die Rollenvorlagen für Kursadministratoren, Kurstutoren und Kursmitglieder. Passen Sie die Rechte für 'edu-sharing-Ressource' und 'edu-sharing-Ressource erstellen' an.
+
+Danach steht Benutzern mit den entsprechend erteilten Rechten bei Klick auf 'Neues Objekt hinzufügen' die Option 'edu-sharing-Ressource' zur Verfügung.
+
+
 Installing and Configuring
 
 - Put the directory LfEduSharingResource into your ILIAS Customizing
   directory at:
   Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource
   (create all missing subdirectories)
-- Create a configuation directory on your server and put all edusharing
-  configuration files into this directory. The directory must be readable
-  for your web server.
-- Within ILIAS open Administration > Plugins, Modules and Services
-- Click on "Administrate" in the "RepositoryObject" slot row.
+- Within ILIAS open Administration > Plugins
 - Install/update and activate the "LfEduSharingResource" plugin
+- execute 'Refresh Languages'
 - After activation click on "Configure" and enter your configuration directory
   path and hit "Save".
   

@@ -1,5 +1,5 @@
 // 
-// English Language File for ExampleObject Plugin
+// German Language File
 //
 
 <!-- language file start -->
@@ -51,3 +51,70 @@ not_usable_no_course#:#edu-sharing Ressourcen können nur innerhalb von Kursen g
 usage_not_registered#:#Die Nutzung des Objektes innerhalb dieses Kurses wurde noch nicht registriert.
 register_usage#:#Nutzung registrieren
 upload#:#Hochladen
+generate_ssl_keys_failed#:#Generating of SSL keys failed. Please check your configuration.
+application_properties#:#Application properties (application_)
+application_appid#:#appid
+application_type#:#type
+application_homerepid#:#homerepid
+application_cc_gui_url#:#cc_gui_url
+application_private_key#:#private_key
+application_public_key#:#public_key
+application_blowfishkey#:#blowfishkey
+application_blowfishiv#:#blowfishiv
+repository_properties#:#Repository properties (repository_)
+repository_public_key#:#public key
+repository_clientport#:#clientport
+repository_port#:#port
+repository_domain#:#domain
+repository_authenticationwebservice_wsdl#:#authenticationwebservice wsdl
+repository_type#:#type
+repository_appid#:#appid
+repository_usagewebservice_wsdl#:#usagewebservice_wsdl
+repository_protocol#:#protocol
+repository_host#:#host
+repository_version#:#version
+repository_version_info#:#Standard: 4 (ZOERR: 4.1)
+authentication_properties#:#Authentication properties (EDU_AUTH_)
+edu_auth_key#:#Key zur Identifizierung des Nutzers
+edu_auth_id#:#Benutzername
+edu_auth_id_info#:#Benutzername wie er auch für die Anmeldung bei ILIAS genutzt wird (nicht empfohlen)
+edu_auth_idnumber#:#User-Id
+edu_auth_idnumber_info#:#ILIAS-User-Id (eingeschränkt empfohlen)
+edu_auth_email#:#E-Mail
+edu_auth_email_info#:#erste E-Mail-Adresse des Benutzers (eingeschränkt empfohlen)
+edu_auth_username#:#Vor- und Nachname des Benutzers
+edu_auth_username_info#:#Vor- und Nachname des Benutzers (nicht empfohlen)
+edu_auth_idnumber_http_path_client_id#:#Kombination aus User-Id, URL und Mandant
+edu_auth_idnumber_http_path_client_id_info#:#Kombination aus User-Id mit Adresse (URL) der ILIAS-Installation und Angabe des Mandanten, z.B.
+edu_auth_shibbolethuid#:#Shibboleth-UId
+edu_auth_shibbolethuid_info#:#Shibboleth-UId
+edu_auth_zoerr_auth#:#ZOERR-Authentifizierung
+edu_auth_zoerr_auth_info#:#ZOERR-spezielle, auf Shibboleth aufbauende Authentifizierung
+edu_auth_param_name_userid#:#PARAM_NAME_USERID
+edu_auth_param_name_userid_info#:#Standard: username
+edu_auth_param_name_lastname#:#PARAM_NAME_LASTNAME
+edu_auth_param_name_lastname_info#:#Standard: lastname
+edu_auth_param_name_firstname#:#PARAM_NAME_FIRSTNAME
+edu_auth_param_name_firstname_info#:#Standard: firstname
+edu_auth_param_name_email#:#PARAM_NAME_EMAIL
+edu_auth_param_name_email_info#:#Standard: email
+edu_auth_affiliation#:#AFFILIATION
+edu_auth_affiliation_info#:#Standard:
+edu_auth_affiliation_name#:#AFFILIATION_NAME
+edu_auth_affiliation_name_info#:#Standard:
+edu_auth_conveyglobalgroups#:#CONVEYGLOBALGROUPS
+edu_auth_conveyglobalgroups_info#:#Standard: Nein 
+guest_properties#:#Guest properties (edu_guest_)
+edu_guest_option#:#Gastzugang für alle
+edu_guest_option_info#:#Standard: Nein; Aktivieren Sie diese Option wenn die (gemeinsame) Authentifizierung mit einem zentralen edu-sharing-Repositorium noch nicht geklärt ist oder Datenschutzerfordernisse die Übermittlung von z.B. einer UserID oder eines Nachnamens zum edu-sharing-Repositorium nicht erlauben. ILIAS-Benutzer mit der globalen Rollen 'Anonymous' erhalten stets nur einen Gastzugang für das edu-sharing-Repositorium.
+edu_guest_guest_id#:#guest_id
+edu_guest_guest_id_info#:#Standard: esguest
+import_metadata#:#Mit Heimat-Repositorium verbinden
+import_application_metadata#:#Mit Heimat-Repositorium verbinden (Achtung: Konfigurationsdaten werden überschrieben)
+metadata_endpoint#:# Metadata endpoint
+metadata_endpoint_info#:#Beispiel: http://edu-sharing-server/edu-sharing/metadata?format=lms
+metadata_import#:#Metadaten importieren
+object_version_use_exact#:#Kein Update dieser Version
+object_version_use_exact_info#:#Die Ressource verbliebe bei Version
+not_visible_now#:#Die Ressource kann vorübergehend nicht angezeigt werden.
+no_resource_set#:#Keine Ressource wurde ausgewählt. Die Einstellungen sollten bei diesem Objekt überprüft werden.

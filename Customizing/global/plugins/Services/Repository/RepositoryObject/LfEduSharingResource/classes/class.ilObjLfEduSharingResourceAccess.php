@@ -30,18 +30,21 @@ class ilObjLfEduSharingResourceAccess extends ilObjectPluginAccess
 	*/
 	function _checkAccess($a_cmd, $a_permission, $a_ref_id, $a_obj_id, $a_user_id = "")
 	{
-		global $ilUser, $ilAccess;
+		global $DIC;
+		global $tree;
+		$parent_ref_id = $tree->getParentId($a_ref_id);
+		$parent_id = ilObject::_lookupObjId($parent_ref_id);
 
 		if ($a_user_id == "")
 		{
-			$a_user_id = $ilUser->getId();
+			$a_user_id = $DIC->user()->getId();
 		}
 
 		switch ($a_permission)
 		{
 			case "read":
-				if (!ilObjLfEduSharingResourceAccess::checkOnline($a_obj_id) &&
-					!$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id))
+				if (!ilObjLfEduSharingResourceAccess::checkOnline($a_obj_id,$parent_id) &&
+					!$DIC->access()->checkAccessOfUser($a_user_id, "write", "", $a_ref_id))
 				{
 					return false;
 				}
@@ -54,14 +57,15 @@ class ilObjLfEduSharingResourceAccess extends ilObjectPluginAccess
 	/**
 	 * Check online status of edusharing resource object
 	 */
-	static function checkOnline($a_id)
+	static function checkOnline($a_id,$a_parent_id)
 	{
-		global $ilDB;
+		global $DIC;
 		
-		$set = $ilDB->query("SELECT is_online FROM rep_robj_xesr_data ".
-			" WHERE id = ".$ilDB->quote($a_id, "integer")
+		$set = $DIC->database()->query("SELECT is_online FROM rep_robj_xesr_usage ".
+			" WHERE id = ".$DIC->database()->quote($a_id, "integer").
+			" AND parent_obj_id = ".$DIC->database()->quote($a_parent_id, "integer")
 			);
-		$rec  = $ilDB->fetchAssoc($set);
+		$rec  = $DIC->database()->fetchAssoc($set);
 		return (boolean) $rec["is_online"];
 	}
 	

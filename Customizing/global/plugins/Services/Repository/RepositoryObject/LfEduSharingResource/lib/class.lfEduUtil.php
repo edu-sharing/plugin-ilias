@@ -6,6 +6,7 @@
  * Edusharing utility class
  *
  * @author Alex Killing <alex.killing@gmx.de>
+ * @author Uwe Kohnle <kohnle@internetlehrer-gmbh.de>
  * @version $Id$
  * @ingroup
  */
@@ -17,63 +18,38 @@ class lfEduUtil
      * @param
      * @return
      */
-    static function buildUrl($a_home_app_conf, $a_cmd, $a_ticket, $a_search_text = "",
-                             $a_re_url = "")
-    {
-        global $ilUser;
+    static function buildUrl($a_cmd, $a_ticket, $a_search_text = "", $a_re_url = "", $ilUser) {
+		$settings = new ilSetting("xedus");
+		require_once('class.locallib.php');
+		require_once('class.cclib.php');
+		$cclib = new mod_edusharing_web_service_factory();
+		$ticket = $cclib->edusharing_authentication_get_ticket(); 
 
-        $pars = array();
-
-        $link = $a_home_app_conf->getEntry('cc_gui_url');
-        if ($link == "")
-        {
-            die("No cc_gui_url given.");
-        }
-
-        switch ($a_cmd)
-        {
-            case "search":
-                $path = '/components/search';
-                if ($a_search_text != "")
-                {
-                    $pars["p_startsearch"] = 1;
-                    $pars["p_searchtext"] = urlencode($a_search_text);
-                }
-                break;
-
-            default:
-                $path = '/components/workspace';
-        }
-
-        if ($a_re_url != "")
-        {
-            $pars["reurl"] = urlencode($a_re_url);
-        }
-
-        // build link to search
-        $link .= $path;
-
-        // todo: what if no email given!?
-        $user = $ilUser->getEmail();
-        $link .= '?user='.urlencode($user);
-
-        // add ticket
-        $link .= '&ticket='.urlencode($a_ticket);
-
-        // add language
-        $link .= '&locale='.urlencode($ilUser->getLanguage());
-        $link .= '&language='.urlencode($ilUser->getLanguage());
-
-        if (is_array($pars))
-        {
-            foreach ($pars  as $k => $v)
-            {
-                $link.= "&".$k."=".$v;
-            }
-        }
-
-        return $link;
-    }
+		$ccresourcesearch = trim($settings->get('application_cc_gui_url'), '/');
+		if ($a_cmd == "search") {
+			if(version_compare($settings->get('repository_version'), '4' ) >= 0) {
+				$ccresourcesearch .= '/components/search';
+				$ccresourcesearch .= '?locale=' . $ilUser->getLanguage();
+				if ($a_search_text != "") {
+					$ccresourcesearch .= "&query=" . urlencode($a_search_text);
+				}
+			} else {
+				$ccresourcesearch .= "/?mode=0";
+				$ccresourcesearch .= "&user=" . urlencode(edusharing_get_auth_key());
+				$ccresourcesearch .= "&locale=" . $ilUser->getLanguage();
+				if ($a_search_text != "") {
+					$ccresourcesearch .= "&p_startsearch=1&p_searchtext=" . urlencode($a_search_text);
+				}
+			}
+		} else {
+			$ccresourcesearch .= "?locale=" . $ilUser->getLanguage();
+		}
+		$ccresourcesearch .= '&ticket='.$ticket;
+		// $ccresourcesearch .= "&reurl=".urlencode($CFG->wwwroot."/mod/edusharing/makelink.php");
+		if ($a_re_url != "") $ccresourcesearch .= "&reurl=".urlencode($a_re_url);
+		//$ccresourcesearch = $CFG->wwwroot .'/mod/edusharing/selectResourceHelper.php?sesskey='.sesskey().'&rurl=' . urlencode($ccresourcesearch);
+		return $ccresourcesearch;
+	}
 
     /**
      * Get repository ID from URI
@@ -81,12 +57,12 @@ class lfEduUtil
      * @param string $a_uri URI
      * @return string repository ID
      */
-    function getRepIdFromUri($a_uri)
-    {
-        $rep_id = parse_url($a_uri, PHP_URL_HOST);
+    // public static function getRepIdFromUri($a_uri)
+    // {
+        // $rep_id = parse_url($a_uri, PHP_URL_HOST);
 
-        return $rep_id;
-    }
+        // return $rep_id;
+    // }
 
     /**
      * Get object ID from URI
@@ -94,88 +70,49 @@ class lfEduUtil
      * @param string $a_uri URI
      * @return string object ID
      */
-    static function getObjectIdFromUri($a_uri)
-    {
-        $object_id = parse_url($a_uri, PHP_URL_PATH);
-        $object_id = str_replace('/', '', $object_id);
+    // static function getObjectIdFromUri($a_uri)
+    // {
+        // $object_id = parse_url($a_uri, PHP_URL_PATH);
+        // $object_id = str_replace('/', '', $object_id);
 
-        return $object_id;
-    }
+        // return $object_id;
+    // }
 
     /**
      * Get render url
      *
-     * @param
+     * @param obj $edusharing
+	 * @param string @displaymode (window, inline)
      * @return
      */
-    static function getRenderUrl($a_obj)
-    {
-        global $ilUser;
+    static function getRenderUrl($edusharing, $displaymode) {
+		//view.php
+		$settings = new ilSetting("xedus");
+		require_once('class.locallib.php');
+		$redirecturl = edusharing_get_redirect_url($edusharing, $displaymode);
+		$ts = $timestamp = round(microtime(true) * 1000);
+		$redirecturl .= '&ts=' . $ts;
+		$data = $settings->get('application_appid') . $ts . edusharing_get_object_id_from_url($edusharing->getUri());//object_url
+		$redirecturl .= '&sig=' . urlencode(edusharing_get_signature($data));
+		$redirecturl .= '&signed=' . urlencode($data);
 
-        $home_app_conf = $a_obj -> getHomeAppConf();
-        $url = $home_app_conf->getEntry("contenturl");
-        $app_id = $home_app_conf->getEntry('appid');
-        $repoPublicKey = $home_app_conf->getEntry('repo_public_key');
+		$backAction = '&closeOnBack=true';
+		// if (empty($edusharing->popup_window)) {
+			// $backAction = '&backLink=' . urlencode($CFG->wwwroot . '/course/view.php?id=' . $courseid);
+		// }
+		// if (!empty($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'modedit.php') !== false) {
+		// if (!empty($_SERVER['HTTP_REFERER'])) {
+			// $backAction = '&backLink=' . urlencode($_SERVER['HTTP_REFERER']);
+		// }
 
-        $url.= '?app_id='.urlencode($app_id);
+		$redirecturl .= $backAction;
 
-        // problem: esrender does not allow many necessary characters
-        $sess_id = session_id();
-        $url.= '&session='.urlencode($sess_id);
+		require_once('class.cclib.php');
+		$cclib = new mod_edusharing_web_service_factory();
+		$redirecturl .= '&ticket=' . urlencode(base64_encode(edusharing_encrypt_with_repo_public($cclib -> edusharing_authentication_get_ticket())));
+		return $redirecturl;
+	}
 
-        $rep_id = $home_app_conf->getEntry("homerepid");
-
-        $url.= '&rep_id='.urlencode($rep_id);
-
-        $res_ref = str_replace('/', '', parse_url($a_obj->getUri(), PHP_URL_PATH));
-        if ($res_ref == "")
-        {
-            include_once("class.ilLfEduSharingLibException.php");
-            throw new ilLfEduSharingLibException('Error parsing resource-url "'.$a_obj->getUri().'".');
-        }
-
-        $url.= '&obj_id='.urlencode($res_ref);
-
-        $url.= '&resource_id='.$a_obj->getRefId();
-        $url.= '&course_id='.$a_obj->getUpperCourse();
-
-        $ES_KEY = $home_app_conf->getEntry("encrypt_key");
-        $ES_IV = $home_app_conf->getEntry("encrypt_initvector");
-
-        $url.= '&u=' . urlencode(base64_encode(self::open_ssl_public_encrypt($repoPublicKey, $ilUser->getEmail())));
-
-        $ts = round(microtime(true) * 1000);
-        $url .= '&ts=' . $ts;
-        $url .= '&display=window';
-
-        $data = $app_id . $ts . $res_ref;
-        $priv_key = $home_app_conf->getEntry('private_key');
-        $pkeyid = openssl_get_privatekey($priv_key);
-        openssl_sign($data, $signature, $pkeyid);
-        $signature = base64_encode($signature);
-        openssl_free_key($pkeyid);
-
-        $url .= '&sig=' . urlencode($signature);
-        $url .= '&signed=' . $data;
-
-        $ticket = $a_obj->getTicket();
-        $url .= '&ticket=' . urlencode(base64_encode(self::open_ssl_public_encrypt($repoPublicKey, $ticket)));
-
-        $url .= '&closeOnBack=true';
-
-        return $url;
-    }
-
-    static function open_ssl_public_encrypt($pubKeyRaw, $data) {
-        $dataEncrypted = '';
-        $key = openssl_get_publickey($pubKeyRaw);
-        openssl_public_encrypt($data ,$dataEncrypted, $key);
-        if($dataEncrypted === false) {
-            include_once("class.ilLfEduSharingLibException.php");
-            throw new ilLfEduSharingLibException('Encryption error.');
-        }
-        return $dataEncrypted;
-    }
 
     /**
      * Format exception
@@ -183,7 +120,7 @@ class lfEduUtil
      * @param
      * @return
      */
-    function formatException($e)
+    static function formatException($e)
     {
         $mess = "Sorry. An error occured when processing your edu-sharing request.";
 

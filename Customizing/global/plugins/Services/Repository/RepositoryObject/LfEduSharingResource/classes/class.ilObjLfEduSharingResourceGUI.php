@@ -13,6 +13,7 @@ include_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/
  * application classes to fulfill certain tasks.
  *
  * @author Alex Killing <alex.killing@gmx.de>
+ * @author Uwe Kohnle <kohnle@internetlehrer-gmbh.de>
  *
  * $Id$
  *
@@ -92,21 +93,21 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	*/
 	function setTabs()
 	{
-		global $ilTabs, $ilCtrl, $ilAccess;
+		global $DIC;
 		
 		// tab for the "show content" command
-		if ($ilAccess->checkAccess("read", "", $this->object->getRefId()))
+		if ($DIC->access()->checkAccess("read", "", $this->object->getRefId()))
 		{
-			$ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"), "_blank");
+			$DIC->tabs()->addTab("content", $this->txt("content"), $DIC->ctrl()->getLinkTarget($this, "showContent"), "_blank");
 		}
 
 		// standard info screen tab
 		$this->addInfoTab();
 
 		// a "properties" tab
-		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
+		if ($DIC->access()->checkAccess("write", "", $this->object->getRefId()))
 		{
-			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
+			$DIC->tabs()->addTab("properties", $this->txt("properties"), $DIC->ctrl()->getLinkTarget($this, "editProperties"));
 		}
 
 		// standard epermission tab
@@ -119,12 +120,15 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	 */
 	function editProperties()
 	{
-		global $tpl, $ilTabs, $ilToolbar, $ilCtrl;
+		global $DIC;
 		
+		$ilToolbar = $DIC->toolbar();
 		// toolbar
-		$ilToolbar->setFormAction($ilCtrl->getFormAction($this));
+		$ilToolbar->setFormAction($DIC->ctrl()->getFormAction($this));
 		if ($this->object->getUri() == "")
 		{
+		// //set parent_obj for edu-sharing
+			// $this->object->afterCreateSetParentObj();
 			$ilToolbar->addText($this->plugin->txt("select_resource"));
 			include_once("./Services/Form/classes/class.ilTextInputGUI.php");
 			$ti = new ilTextInputGUI("", "edus_svalue");
@@ -141,8 +145,12 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		// check whether upper course is given
 		if ($this->object->getUri() != "" && $this->object->getUpperCourse() == 0)
 		{
-			ilUtil::sendFailure($this->plugin->txt("not_usable_no_course"));
+			ilUtil::sendFailure($this->plugin->txt("not_usable_no_parent_object"));
 		}
+		// else if ($this->object->getUri() == "" && !$this->object->checkRegisteredUsage())
+		// {
+			// ilUtil::sendFailure($this->plugin->txt("failure after copy"));
+		// }
 		else
 		{
 			// check whether usage is registered
@@ -156,10 +164,10 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 			}
 		}
 		
-		$ilTabs->activateTab("properties");
+		$DIC->tabs()->activateTab("properties");
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
-		$tpl->setContent($this->form->getHTML());
+		$DIC->ui()->mainTemplate()->setContent($this->form->getHTML());
 	}
 	
 	/**
@@ -169,7 +177,7 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	*/
 	public function initPropertiesForm()
 	{
-		global $ilCtrl;
+		global $DIC;
 	
 		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$this->form = new ilPropertyFormGUI();
@@ -187,15 +195,22 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		$cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
 		$this->form->addItem($cb);
 		
+		// version setting
+		$cb = new ilCheckboxInputGUI($this->plugin->txt("object_version_use_exact"), "object_version_use_exact");
+		$cb->setValue("1");
+		$cb->setInfo($this->plugin->txt("object_version_use_exact_info").' '.$this->object->getObjectVersion());
+		$this->form->addItem($cb);
+
 		// uri
-		$ne = new ilNonEditableValueGUI($this->plugin->txt("uri"), "uri");
+		$ne = new ilNonEditableValueGUI($this->lng->txt("uri"), "uri");
 		$ne->setValue($this->object->getUri());
 		$this->form->addItem($ne);
+		
 
 		$this->form->addCommandButton("updateProperties", $this->txt("save"));
 	                
 		$this->form->setTitle($this->txt("edit_properties"));
-		$this->form->setFormAction($ilCtrl->getFormAction($this));
+		$this->form->setFormAction($DIC->ctrl()->getFormAction($this));
 	}
 	
 	/**
@@ -207,6 +222,7 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		$values["desc"] = $this->object->getDescription();
 		$values["uri"] = $this->object->getUri();
 		$values["online"] = $this->object->getOnline();
+		$values["object_version_use_exact"] = $this->object->getObjectVersionUseExact();
 		$this->form->setValuesByArray($values);
 	}
 	
@@ -215,7 +231,7 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	*/
 	public function updateProperties()
 	{
-		global $tpl, $lng, $ilCtrl;
+		global $DIC;
 	
 		$this->initPropertiesForm();
 		if ($this->form->checkInput())
@@ -223,13 +239,14 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->setOnline($this->form->getInput("online"));
+			$this->object->setObjectVersionUseExact($this->form->getInput("object_version_use_exact"));
 			$this->object->update();
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "editProperties");
+			ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
+			$DIC->ctrl()->redirect($this, "editProperties");
 		}
 
 		$this->form->setValuesByPost();
-		$tpl->setContent($this->form->getHtml());
+		$DIC->ui()->mainTemplate()->setContent($this->form->getHtml());
 	}
 	
 	
@@ -238,26 +255,22 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	 */
 	function searchResource()
 	{
-		global $ilCtrl;
-		
-		// see mod/mod_form.php 114
+		global $DIC;
 		
 		$this->plugin->includeClass("../lib/class.lfEduUtil.php");
 		
 		try
 		{
-			$home_app_conf = $this->object->getHomeAppConf();
 			$ticket = $this->object->getTicket();
 			$stext = ilUtil::stripSlashes($_POST["edus_svalue"]);
-			$re_url = ILIAS_HTTP_PATH.'/'.$ilCtrl->getLinkTarget($this, "setResource", "", false, false);
-			$url = lfEduUtil::buildUrl($home_app_conf, "search", $ticket, $stext, $re_url);
+			$re_url = ILIAS_HTTP_PATH.'/'.$DIC->ctrl()->getLinkTarget($this, "setResource", "", false, false);
+			$url = lfEduUtil::buildUrl("search", $ticket, $stext, $re_url, $DIC->user());
 		}
 		catch (Exception $e)
 		{
 			ilUtil::sendFailure(lfEduUtil::formatException($e), true);
-			$ilCtrl->redirect($this, "editProperties");
+			$DIC->ctrl()->redirect($this, "editProperties");
 		}
-
 		
 		ilUtil::redirect($url);
 	}
@@ -267,31 +280,30 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	 */
 	function browseResource()
 	{
-		global $ilCtrl;
+		global $DIC;
 		
 		try
 		{
 			$this->plugin->includeClass("../lib/class.lfEduUtil.php");
-			$home_app_conf = $this->object->getHomeAppConf();
 			$ticket = $this->object->getTicket();
-			$re_url = ILIAS_HTTP_PATH.'/'.$ilCtrl->getLinkTarget($this, "setResource", "", false, false);
-			$url = lfEduUtil::buildUrl($home_app_conf, "browse", $ticket, "", $re_url);
+			$re_url = ILIAS_HTTP_PATH.'/'.$DIC->ctrl()->getLinkTarget($this, "setResource", "", false, false);
+			$url = lfEduUtil::buildUrl("browse", $ticket, "", $re_url, $DIC->user());
 		}
 		catch (Exception $e)
 		{
 			ilUtil::sendFailure(lfEduUtil::formatException($e), true);
-			$ilCtrl->redirect($this, "editProperties");
+			$DIC->ctrl()->redirect($this, "editProperties");
 		}
 
 		ilUtil::redirect($url);
 	}
 	
 	/**
-	 * Upload resource
+	 * Upload resource //needed anymore?
 	 */
 	function uploadResource()
 	{
-		global $ilCtrl;
+		global $DIC;
 		
 		// see mod/mod_form.php 114
 		
@@ -300,17 +312,15 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		try
 		{
 			$this->plugin->includeClass("../lib/class.lfEduUtil.php");
-			$home_app_conf = $this->object->getHomeAppConf();
 			$ticket = $this->object->getTicket();
-			$re_url = ILIAS_HTTP_PATH.'/'.$ilCtrl->getLinkTarget($this, "setResource", "", false, false);
-			$url = lfEduUtil::buildUrl($home_app_conf, "upload", $ticket, "", $re_url);
+			$re_url = ILIAS_HTTP_PATH.'/'.$DIC->ctrl()->getLinkTarget($this, "setResource", "", false, false);
+			$url = lfEduUtil::buildUrl("upload", $ticket, "", $re_url, $DIC->user());
 		}
 		catch (Exception $e)
 		{
 			ilUtil::sendFailure(lfEduUtil::formatException($e), true);
-			$ilCtrl->redirect($this, "editProperties");
+			$DIC->ctrl()->redirect($this, "editProperties");
 		}
-
 		
 		ilUtil::redirect($url);
 	}
@@ -323,7 +333,7 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	 */
 	function setResource()
 	{
-		global $ilCtrl;
+		global $DIC;
 		
 		try
 		{
@@ -334,10 +344,10 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		catch (Exception $e)
 		{
 			ilUtil::sendFailure(lfEduUtil::formatException($e), true);
-			$ilCtrl->redirect($this, "editProperties");
+			$DIC->ctrl()->redirect($this, "editProperties");
 		}
 		
-		$ilCtrl->redirect($this, "editProperties");
+		$DIC->ctrl()->redirect($this, "editProperties");
 	}
 	
 	/**
@@ -348,7 +358,7 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	 */
 	function registerUsage()
 	{
-		global $ilCtrl;
+		global $DIC;
 		
 		try
 		{
@@ -358,10 +368,10 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		catch (Exception $e)
 		{
 			ilUtil::sendFailure(lfEduUtil::formatException($e), true);
-			$ilCtrl->redirect($this, "editProperties");
+			$DIC->ctrl()->redirect($this, "editProperties");
 		}
 		
-		$ilCtrl->redirect($this, "editProperties");
+		$DIC->ctrl()->redirect($this, "editProperties");
 	}
 
 	
@@ -370,24 +380,26 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 	 */
 	function showContent()
 	{
-		global $tpl, $ilTabs, $ilUser;
+		global $DIC;
 		
-		$ilTabs->activateTab("content");
-
+		$DIC->tabs()->activateTab("content");
 				
 		$this->plugin->includeClass("../lib/class.lfEduUtil.php");
 		
+		if (!$this->object->getUri()) {
+			ilUtil::sendFailure($this->plugin->txt("no_resource_set"), true);
+			return;
+		}
 		
-		if (!$this->object->checkRegisteredUsage())
-		{
+		if (!$this->object->checkRegisteredUsage()) {
+			ilUtil::sendFailure($this->plugin->txt("not_visible_now"), true);
 			return;
 		}
 
-		$redirect_url = lfEduUtil::getRenderUrl($this->object);
+		$redirect_url = lfEduUtil::getRenderUrl($this->object, 'window');
 
 		ilUtil::redirect($redirect_url);
 	}
-	
 
 }
 ?>
