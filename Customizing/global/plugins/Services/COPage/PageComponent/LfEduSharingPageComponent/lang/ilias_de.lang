@@ -1,0 +1,22 @@
+// 
+// German Language File
+//
+
+<!-- language file start -->
+cmd_insert#:#edu-sharing-Ressource einfügen
+pchfp_content_not_exists#:#Die edu-sharing-Ressource existiert nicht mehr!
+search_and_create#:#Suchen und erstellen
+search_and_create_form_title#:#edu-sharing-Ressource wählen
+uri#:#URI
+mimetype#:#Internet Media Type (MIME-Type)
+resID#:#ILIAS-ID der Ressource
+window_width#:#Breite der Ressource in Pixel
+window_width_info#:#Breite der Orginal-Ressource: %s Pixel<br/>Höhe der Orginal-Ressource: %s Pixel<br/>Bei Änderung der Breite wird die Höhe automatisch berechnet.
+object_version_use_exact#:#Kein Update dieser Version
+object_version_use_exact_info#:#Die Resource verbliebe bei Version
+window_float#:#Ausrichtung
+no_float#:#Standard
+float_left#:#Links, Text umfließend
+float_right#:#Rechts, Text umfließend
+not_visible_now#:#Die Ressource kann vorübergehend nicht angezeigt werden.
+failure_create#:#Das Einbinden der Ressource war nicht erfolgreich. Bitte löschen Sie diesen Inhalt.

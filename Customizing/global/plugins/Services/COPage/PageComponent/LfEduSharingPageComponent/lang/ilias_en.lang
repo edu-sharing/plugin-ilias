@@ -1,0 +1,22 @@
+// 
+// English Language File
+//
+
+<!-- language file start -->
+cmd_insert#:#Insert edu-sharing-Resource
+pchfp_content_not_exists#:#The edu-sharing-Resource does not exist anymore!
+search_and_create#:#Search and create
+search_and_create_form_title#:#Choose edu-sharing-resource 
+uri#:#URI
+mimetype#:#Internet Media Type (MIME-Type)
+resID#:#ILIAS-ID of the resource
+window_width#:#Width of the resource in pixel 
+window_width_info#:#Width of the original resource: %s Pixel<br/>Height of the original resource: %s Pixel<br/>When changing width, the height is automatically adapted. 
+object_version_use_exact#:#No update of this version
+object_version_use_exact_info#:#The resource remains in version
+window_float#:#Alignment
+no_float#:#Standard
+float_left#:#Left, wrapped by text
+float_right#:#Right, wrapped by text
+not_visible_now#:#The resource cannot be displayed temporarily. 
+failure_create#:#The integration of the resource was not successful. Please delete this content. 
