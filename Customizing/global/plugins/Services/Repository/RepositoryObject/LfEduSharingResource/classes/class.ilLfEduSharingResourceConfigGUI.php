@@ -177,6 +177,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$iliasDomain = substr(ILIAS_HTTP_PATH,7);
 		if (substr($iliasDomain,0,1) == "\/") $iliasDomain = substr($iliasDomain,1);
 		if (substr($iliasDomain,0,4) == "www.") $iliasDomain = substr($iliasDomain,4);
+		$iliasDomainRep = str_replace('/','',$iliasDomain).CLIENT_ID;
 		$iliasDomain .= ';'.CLIENT_ID;
 
 		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
@@ -340,13 +341,13 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_affiliation'), 'EDU_AUTH_AFFILIATION');
 		$ti->setMaxLength(50);
-		$ti->setInfo($this->pl->txt('edu_auth_affiliation_info').' '.$iliasDomain);
+		$ti->setInfo($this->pl->txt('edu_auth_affiliation_info').' '.$iliasDomainRep);
 		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION'));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_affiliation_name'), 'EDU_AUTH_AFFILIATION_NAME');
 		$ti->setMaxLength(50);
-		$ti->setInfo($this->pl->txt('edu_auth_affiliation_name_info').' '.$iliasDomain);
+		$ti->setInfo($this->pl->txt('edu_auth_affiliation_name_info').' '.$iliasDomainRep);
 		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION_NAME'));
 		$form->addItem($ti);
 

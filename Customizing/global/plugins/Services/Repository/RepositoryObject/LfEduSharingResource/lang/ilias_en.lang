@@ -73,7 +73,7 @@ repository_usagewebservice_wsdl#:#usagewebservice_wsdl
 repository_protocol#:#protocol
 repository_host#:#host
 repository_version#:#version
-repository_version_info#:#Standard: 4 (ZOERR: 4.1)
+repository_version_info#:#Standard: 4.2
 authentication_properties#:#Authentication properties (EDU_AUTH_)
 edu_auth_key#:#Key to identify user
 edu_auth_id#:#User name

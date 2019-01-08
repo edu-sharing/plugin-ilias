@@ -26,6 +26,7 @@ $plugin = new ilLfEduSharingPageComponentPlugin();
 $settings = new ilSetting("xedus");
 
 $plugin->setVars($_GET['resId']);
+if (isset($_GET['childobject_id'])) $childobject_id = $_GET['childobject_id'];//4.2
 
 $redirecturl = edusharing_get_redirect_url($plugin, 'window');
 $ts = $timestamp = round(microtime(true) * 1000);
@@ -37,6 +38,8 @@ $redirecturl .= '&closeOnBack=true';
 $plugin->includeClass('../../../../Repository/RepositoryObject/LfEduSharingResource/lib/class.cclib.php');
 $cclib = new mod_edusharing_web_service_factory();
 $redirecturl .= '&ticket=' . urlencode(base64_encode(edusharing_encrypt_with_repo_public($cclib -> edusharing_authentication_get_ticket())));
+
+if ($childobject_id) $redirecturl .= '&childobject_id=' . $childobject_id; //4.2
 
 ilUtil::redirect($redirecturl);
 exit;

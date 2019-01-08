@@ -45,6 +45,7 @@ class lfEduUtil
 			$ccresourcesearch .= "?locale=" . $ilUser->getLanguage();
 		}
 		$ccresourcesearch .= '&ticket='.$ticket;
+		$ccresourcesearch .= '&applyDirectories=true'; // used in 4.2 or higher
 		// $ccresourcesearch .= "&reurl=".urlencode($CFG->wwwroot."/mod/edusharing/makelink.php");
 		if ($a_re_url != "") $ccresourcesearch .= "&reurl=".urlencode($a_re_url);
 		//$ccresourcesearch = $CFG->wwwroot .'/mod/edusharing/selectResourceHelper.php?sesskey='.sesskey().'&rurl=' . urlencode($ccresourcesearch);
@@ -105,7 +106,7 @@ class lfEduUtil
 			// $backAction = '&backLink=' . urlencode($_SERVER['HTTP_REFERER']);
 		// }
 
-		$redirecturl .= $backAction;
+		if ($displaymode != "inline") $redirecturl .= $backAction;
 
 		require_once('class.cclib.php');
 		$cclib = new mod_edusharing_web_service_factory();

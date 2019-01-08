@@ -286,16 +286,19 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 		// $data = $settings->get('application_appid') . $ts . edusharing_get_object_id_from_url($this->plugin->getUri());//object_url
 		// $redirecturl .= '&sig=' . urlencode(edusharing_get_signature($data));
 		// $redirecturl .= '&signed=' . urlencode($data);
-		// $redirecturl .= '&closeOnBack=true';
+		// // '&videoFormat=' . optional_param('videoFormat', '', PARAM_TEXT);
+		// // $redirecturl .= '&closeOnBack=true';
 		// $this->plugin->includeClass('../../../../Repository/RepositoryObject/LfEduSharingResource/lib/class.cclib.php');
 		// $cclib = new mod_edusharing_web_service_factory();
 		// $redirecturl .= '&ticket=' . urlencode(base64_encode(edusharing_encrypt_with_repo_public($cclib -> edusharing_authentication_get_ticket())));
-		
-		$redirecturlInline = lfEduUtil::getRenderUrl($this->plugin, 'inline');
+		// $redirecturlInline = $redirecturl;
+
+		$redirecturlInline = lfEduUtil::getRenderUrl($this->plugin, 'inline'); //4.1
+		// $redirecturlInline = lfEduUtil::getRenderUrl($this->plugin, 'window');
+// echo('<a href="'.$redirecturlInline.'">test</a>\r\n');
 		$html .= '<div';
 		if ($this->plugin->getWindowFloat() != 'no') $html .= ' style="float:'.$this->plugin->getWindowFloat().'"';
 		$html .= '>'.$this->filter_edusharing_get_render_html($redirecturlInline).'</div>';
-		
 		$html = $this->filter_edusharing_display($html);
 		if ($counter == 0) $html .= '<script type="text/javascript" src="./Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/js/edu.js"></script>';
 
@@ -365,11 +368,11 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             curl_setopt($curlhandle, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
             curl_setopt($curlhandle, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curlhandle, CURLOPT_SSL_VERIFYHOST, false);
-            $inline = curl_exec($curlhandle);
-            if($inline === false) {
+			$inline = curl_exec($curlhandle);
+			if($inline === false) {
 				ilLoggerFactory::getLogger('xesp')->warning(curl_error($curlhandle));
 				ilUtil::sendFailure($this->plugin->txt("not_visible_now").' '.curl_error($curlhandle), true);
-            }
+			}
         } catch (Exception $e) {
 			ilLoggerFactory::getLogger('xesp')->warning($e->getMessage());
 			ilUtil::sendFailure($this->plugin->txt("not_visible_now").' '.$e->getMessage(), true);
@@ -386,36 +389,36 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 
 		$resid = $this->plugin->getResId();
 		
-		$html = str_replace(array("\n", "\r", "\n"
-        ), '', $html);
+		$html = str_replace(array("\n", "\r", "\n"), '', $html);
 
         /*
          * replaces {{{LMS_INLINE_HELPER_SCRIPT}}}
          */
         $html = str_replace("{{{LMS_INLINE_HELPER_SCRIPT}}}",
                 ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resid . "&ref_id=" . $_GET['ref_id'], $html);
-
-		/*
-         * replaces <es:title ...>...</es:title>
-         */
-        // $html = preg_replace("/<es:title[^>]*>.*<\/es:title>/Uims", utf8_decode(optional_param('title', '', PARAM_TEXT)), $html);
-		// $html = preg_replace("/<es:title[^>]*>.*<\/es:title>/Uims", 'LINK', $html);
+		$customTitle = true;
         /*
          * For images, audio and video show a capture underneath object
          */
         // $mimetypes = array('jpg', 'jpeg', 'gif', 'png', 'bmp', 'video', 'audio');
-        // $addCaption = false;
+		$mimetypes = array('image', 'video', 'audio'); //4.2
+        $addCaption = false;
         // foreach ($mimetypes as $mimetype) {
             // // if (strpos(optional_param('mimetype', '', PARAM_TEXT), $mimetype) !== false) {
             // if (strpos($this->plugin->getMimetype(), $mimetype) !== false) {
                 // $addCaption = true;
+				// $customTitle = false;
             // }
         // }
-        // // if(strpos(optional_param('mediatype', '', PARAM_TEXT), 'tool_object') !== false)
-            // // $addCaption = true;
-
-        // // if($addCaption)
-            // // $html .= '<p class="caption">' . optional_param('title', '', PARAM_TEXT) . '</p>';
+        // // if(strpos(optional_param('mediatype', '', PARAM_TEXT), 'tool_object') !== false) {
+        // if(strpos($this->plugin->getMediaType(), 'tool_object') !== false) {
+            // $addCaption = true;
+			// $customTitle = false;
+		// }
+		// if($customTitle)
+			// $html = preg_replace("/<es:title[^>]*>.*<\/es:title>/Uims", utf8_decode($this->plugin->getTitle())), $html);
+        // if($addCaption)
+            // $html .= '<p class="caption">' . $this->plugin->getTitle() . '</p>';
 
         return $html;
         // exit();
