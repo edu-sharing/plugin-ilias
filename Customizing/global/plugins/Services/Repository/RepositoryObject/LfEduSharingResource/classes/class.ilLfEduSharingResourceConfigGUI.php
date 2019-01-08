@@ -3,6 +3,7 @@
 /* Copyright (c) 2012 Leifos GmbH, GPL */
 
 include_once("./Services/Component/classes/class.ilPluginConfigGUI.php");
+include_once("class.ilLfEduSharingResourcePlugin.php");
  
 /**
  * Edusharing resource configuration user interface class
