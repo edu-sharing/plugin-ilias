@@ -105,12 +105,36 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		if ($form->checkInput()) {
 			try {
 				$mde = $form->getInput("metadata_endpoint");
+
+				// fau: eduProxy - use proxy for eduSharing connection
+				$curlConnection = new ilCurlConnection($mde);
+				$curlConnection->init();
+				$proxy = ilProxySettings::_getInstance();
+				if ($proxy->isActive()) {
+					$curlConnection->setOpt(CURLOPT_HTTPPROXYTUNNEL, true);
+
+					if (!empty($proxy->getHost())) {
+						$curlConnection->setOpt(CURLOPT_PROXY, $proxy->getHost());
+					}
+
+					if (!empty($proxy->getPort())) {
+						$curlConnection->setOpt(CURLOPT_PROXYPORT, $proxy->getPort());
+					}
+				}
+				$curlConnection->setOpt(CURLOPT_RETURNTRANSFER, true);
+				$curlConnection->setOpt(CURLOPT_VERBOSE, false);
+				$curlConnection->setOpt(CURLOPT_TIMEOUT, 30);
+				$metadata = $curlConnection->exec();
+				$curlConnection->close();
+				$curlConnection = null;
+
 				$xml = new DOMDocument();
 				libxml_use_internal_errors(true);
-				if ($xml->load($mde) == false) {
+				if ($xml->loadXML($metadata) == false) {
 					ilUtil::sendFailure($this->pl->txt("import_metadata_failure"), true);
 					$this->ctrl->redirect($this, "importMetadata");
 				}
+				// fau.
 				
 				$xml->preserveWhiteSpace = false;
 				$xml->formatOutput = true;
