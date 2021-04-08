@@ -24,18 +24,18 @@ class SigSoapClient extends SoapClient {
         $proxy = ilProxySettings::_getInstance();
 
         if ($proxy->isActive()) {
-//            $options['proxy_host'] = $proxy->getHost();
-//            $options['proxy_port'] = (int) $proxy->getPort();
-//
-               $options['stream_context'] = stream_context_create(
-                   array(
-//                       'ssl' => array(
-//                           'verify_peer'       => false,
-//                           'verify_peer_name'  => false,
-//                       ),
+            $options['proxy_host'] = $proxy->getHost();
+            $options['proxy_port'] = (int) $proxy->getPort();
+
+                $options['stream_context'] = stream_context_create(
+                    array(
+                       'ssl' => array(
+                           'verify_peer'       => false,
+                           'verify_peer_name'  => false,
+                       ),
                        'http' => array (
                            'proxy' => 'http://' . $proxy->getHost() . ':' . $proxy->getPort(),
-                           //'request_fulluri' => false,
+                           'request_fulluri' => true,
                            //'ignore_errors' => true
                        ),
                    )

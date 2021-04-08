@@ -368,7 +368,19 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             curl_setopt($curlhandle, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
             curl_setopt($curlhandle, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curlhandle, CURLOPT_SSL_VERIFYHOST, false);
-			$inline = curl_exec($curlhandle);
+            // fau: eduProxy - use proxy for eduSharing connection
+            $proxy = ilProxySettings::_getInstance();
+            if ($proxy->isActive()) {
+                curl_setopt($curlhandle,CURLOPT_HTTPPROXYTUNNEL, true);
+                if (!empty($proxy->getHost())) {
+                    curl_setopt($curlhandle, CURLOPT_PROXY, $proxy->getHost());
+                }
+                if (!empty($proxy->getPort())) {
+                    curl_setopt($curlhandle, CURLOPT_PROXYPORT, $proxy->getPort());
+                }
+            }
+            // fau.
+            $inline = curl_exec($curlhandle);
 			if($inline === false) {
 				ilLoggerFactory::getLogger('xesp')->warning(curl_error($curlhandle));
 				ilUtil::sendFailure($this->plugin->txt("not_visible_now").' '.curl_error($curlhandle), true);
