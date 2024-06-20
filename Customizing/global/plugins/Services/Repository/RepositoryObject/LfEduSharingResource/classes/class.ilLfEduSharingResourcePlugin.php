@@ -13,13 +13,21 @@
 class ilLfEduSharingResourcePlugin extends ilRepositoryObjectPlugin
 {
 	const ID = "xesr";
-	protected static $instance = NULL;
-	
-	function getPluginName() {
+	protected static ?ilLfEduSharingResourcePlugin $instance = NULL;
+
+	public function __construct()
+	{
+		global $DIC;
+		$this->db = $DIC->database();
+		parent::__construct($this->db, $DIC["component.repository"], self::ID);
+	}
+	function getPluginName(): string
+	{
 		return "LfEduSharingResource";
 	}
 	
-	public static function getInstance() {
+	public static function getInstance(): ilLfEduSharingResourcePlugin
+	{
 		if (self::$instance === NULL) {
 			self::$instance = new self();
 		}
@@ -27,7 +35,8 @@ class ilLfEduSharingResourcePlugin extends ilRepositoryObjectPlugin
 	}
 
 	
-	protected function uninstallCustom() {
+	protected function uninstallCustom(): void
+	{
 		// TODO: delete database
 	}
 }

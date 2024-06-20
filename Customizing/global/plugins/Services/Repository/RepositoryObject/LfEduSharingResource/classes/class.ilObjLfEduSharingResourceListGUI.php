@@ -1,9 +1,5 @@
 <?php
 
-/* Copyright (c) 2012 Leifos GmbH, GPL */
-
-include_once "./Services/Repository/classes/class.ilObjectPluginListGUI.php";
-
 /**
 * ListGUI implementation for Edusharing resource object plugin. This one
 * handles the presentation in container items (categories, courses, ...)
@@ -28,7 +24,7 @@ class ilObjLfEduSharingResourceListGUI extends ilObjectPluginListGUI
 	/**
 	* Get name of gui class handling the commands
 	*/
-	function getGuiClass()
+	function getGuiClass(): string
 	{
 		return "ilObjLfEduSharingResourceGUI";
 	}
@@ -36,7 +32,7 @@ class ilObjLfEduSharingResourceListGUI extends ilObjectPluginListGUI
 	/**
 	* Get commands
 	*/
-	function initCommands()
+	function initCommands(): array
 	{
 		return array
 		(
@@ -53,7 +49,7 @@ class ilObjLfEduSharingResourceListGUI extends ilObjectPluginListGUI
 	}
 
 	
-	function getCommandFrame($a_cmd)
+	function getCommandFrame($a_cmd): string
 	{
 		if ($a_cmd == "showContent")
 		{
@@ -70,7 +66,7 @@ class ilObjLfEduSharingResourceListGUI extends ilObjectPluginListGUI
 	*						"property" (string) => property name
 	*						"value" (string) => property value
 	*/
-	function getProperties()
+	function getProperties(): array
 	{
 		$props = array();
 		$parent_id = ilObject::_lookupObjId($this->parent_ref_id);

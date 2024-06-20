@@ -16,18 +16,20 @@
 class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPluginInterface
 {
 
-	public $window_width = 200;
-	public $window_height = 100;
-	public $object_version = 0;
-	protected $object_version_use_exact = 1;
+	public int $window_width = 200;
+	public int $window_height = 100;
+	public string $object_version = '0';
+	protected int $object_version_use_exact = 1;
 
 	protected bool $online = false;
+
+	protected ?string $uri = null;
 
 	/**
 	 * Constructor
 	 * @access    public
 	 */
-	function __construct($a_ref_id = 0)
+	public function __construct($a_ref_id = 0)
 	{
 		parent::__construct($a_ref_id);
 	}
@@ -35,7 +37,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	/**
 	 * Get type.
 	 */
-	final function initType()
+	protected function initType() : void
 	{
 		$this->setType("xesr");
 	}
@@ -45,50 +47,42 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	 * used in lib
 	 * @return string uri
 	 */
-	public function getResId()
+	public function getResId() : int
 	{
 		return $this->getId();
 	}
 
-	/**
-	 * Set URI
-	 * @param string $a_val uri
-	 */
-	public function setUri($a_val)
+	public function setUri(?string $a_val) : void
 	{
 		$this->uri = $a_val;
 	}
 
-	/**
-	 * Get URI
-	 * @return string uri
-	 */
-	public function getUri()
+	public function getUri() : ?string
 	{
 		return $this->uri;
 	}
 
-	public function setObjectVersion($a_val)
+	public function setObjectVersion(string $a_val) : void
 	{
 		$this->object_version = $a_val;
 	}
 
-	public function getObjectVersion()
+	public function getObjectVersion() : string
 	{
 		return $this->object_version;
 	}
 
-	public function setObjectVersionUseExact($a_val)
+	public function setObjectVersionUseExact(int $a_val) : void
 	{
 		$this->object_version_use_exact = $a_val;
 	}
 
-	public function getObjectVersionUseExact()
+	public function getObjectVersionUseExact() : int
 	{
 		return $this->object_version_use_exact;
 	}
 
-	public function getObjectVersionForUse()
+	public function getObjectVersionForUse() : string
 	{
 		if ($this->object_version_use_exact == 0) {
 			return 0;
@@ -97,11 +91,12 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		}
 	}
 
-	public function setOnline($a_val)
+	public function setOnline(int $a_val) : void
 	{
 		$this->online = (bool) $a_val;
 	}
-	public function getOnline()
+
+	public function getOnline() : bool
 	{
 		return (bool) $this->online;
 	}
@@ -109,7 +104,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	/**
 	 * Create object
 	 */
-	protected function doCreate()
+	protected function doCreate(bool $clone_mode = false) : void
 	{
 		global $DIC;
 		$db = $DIC->database();
@@ -119,10 +114,11 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 				'edus_uri' => array('text', $this->getUri()), //""
 				'parent_obj_id' => array('integer', $this->getId()),
 				'is_online' => array('integer', $this->getOnline()),
-				'object_version' => array('integer', $this->getObjectVersion()),
+				'object_version' => array('text', $this->getObjectVersion()),
 				'object_version_use_exact' => array('integer', $this->getObjectVersionUseExact()),
 				'timecreated' => array('timestamp', date('Y-m-d H:i:s')),
-				'timemodified' => array('timestamp', date('Y-m-d H:i:s'))
+				'timemodified' => array('timestamp', date('Y-m-d H:i:s')),
+				'crs_ref_id' => array('integer', 0)
 			)
 		);
 	}
@@ -145,7 +141,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	/**
 	 * Read data from db
 	 */
-	function doRead()
+	protected function doRead() : void
 	{
 		global $DIC;
 		$check_parent_obj_id = 0;
@@ -154,7 +150,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		$query = "SELECT * FROM rep_robj_xesr_usage WHERE id = " . $db->quote($this->getId(), 'integer') .
 			" AND parent_obj_id = " . $db->quote($this->getUpperCourse(), "integer");
 		$result = $db->query($query);
-		while (($row = $result->fetchAssoc()) !== false) {
+		while ($row = $result->fetchAssoc()) {
 			$this->setUri($row['edus_uri']);
 			$this->setOnline($row["is_online"]);
 			$this->setObjectVersion($row['object_version']);
@@ -189,7 +185,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	/**
 	 * Update data
 	 */
-	protected function doUpdate()
+	protected function doUpdate() : void
 	{
 		// die URI setzen
 		$old_uri = self::lookupUri($this->getId(), $this->getUpperCourse());
@@ -197,7 +193,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 
 		// change of uri not allowed
 		if ($old_uri != $new_uri && $old_uri != "") {
-			$this->plugin->includeClass("../exceptions/class.ilLfEduSharingResourceException.php");
+//			$this->plugin->includeClass("../exceptions/class.ilLfEduSharingResourceException.php");
 			throw new ilLfEduSharingResourceException("Update: Change of URI not supported.");
 		}
 
@@ -207,7 +203,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 //		edusharing_add_instance($this);
 		$service = new EduSharingService();
 		$usageResult = $service->addInstance($this);
-		if ($usageResult == false) {
+		if (!$usageResult) {
 			//delete
 			die('usageResult = false');
 		}
@@ -240,7 +236,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 			)
 		);
 
-		return true;
+//		return true;
 	}
 
 	protected function doClone($new_obj, $a_target_id, $a_copy_id) : void
@@ -284,7 +280,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	/**
 	 * Delete data from db
 	 */
-	public function doDelete()
+	protected function doDelete() : void
 	{
 		global $DIC;
 		//check Verknüpfungen; ToDo simplify
@@ -292,7 +288,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		$query = "SELECT edus_uri, parent_obj_id FROM rep_robj_xesr_usage " .
 			" WHERE id = " . $DIC->database()->quote($this->getId(), "integer");
 		$result = $DIC->database()->query($query);
-		while (($rec = $result->fetchAssoc()) !== false) {
+		while ($rec = $result->fetchAssoc()) {
 //			edusharing_delete_instance($this->getId(), $rec['edus_uri'], $rec['parent_obj_id']);
 			$service = new EduSharingService();
 			$service->deleteInstance((string) $rec['edus_uri'], $this->getId(), $rec['parent_obj_id']);
@@ -322,7 +318,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	/**
 	 * Do Cloning
 	 */
-	public function doCloneObject($new_obj, $a_target_id, $a_copy_id = null)
+	protected function doCloneObject($new_obj, $a_target_id, $a_copy_id = null) : void
 	{
 		$this->doClone($new_obj, $a_target_id, $a_copy_id);
 	}
@@ -361,12 +357,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	// }
 	// }
 
-	/**
-	 * Set usage
-	 * @param
-	 * @return
-	 */
-	public function setUsage()
+	public function setUsage() : void
 	{
 //		$this->plugin->includeClass('../lib/class.lib.php');
 //		edusharing_add_instance($this);
@@ -377,10 +368,8 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 
 	/**
 	 * Get upper object
-	 * @param
-	 * @return
 	 */
-	public function getUpperCourse()
+	public function getUpperCourse() : int
 	{
 		global $tree;
 		$parent_ref_id = $tree->getParentId($this->getRefId());
@@ -390,10 +379,8 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 
 	/**
 	 * Check registered usage
-	 * @param
-	 * @return
 	 */
-	function checkRegisteredUsage()
+	function checkRegisteredUsage() : bool
 	{
 		if ($this->getUri() == "") {
 			return false;
@@ -402,7 +389,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		$db = $DIC->database();
 		$query = "SELECT parent_obj_id FROM rep_robj_xesr_usage WHERE id = " . $db->quote($this->getId(), 'integer');
 		$result = $db->query($query);
-		while (($row = $result->fetchAssoc()) !== false) {
+		while ($row = $result->fetchAssoc()) {
 			if ($row['parent_obj_id'] == $this->getUpperCourse()) {
 				return true;
 			}

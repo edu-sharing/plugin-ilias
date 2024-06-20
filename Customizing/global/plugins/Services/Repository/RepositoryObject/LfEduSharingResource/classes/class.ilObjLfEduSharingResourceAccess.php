@@ -1,9 +1,5 @@
 <?php
 
-/* Copyright (c) 2012 Leifos GmbH, GPL */
-
-include_once("./Services/Repository/classes/class.ilObjectPluginAccess.php");
-
 /**
  * Access/Condition checking for Edusharing resource object
  *
@@ -28,14 +24,14 @@ class ilObjLfEduSharingResourceAccess extends ilObjectPluginAccess
 	*
 	* @return	boolean		true, if everything is ok
 	*/
-	function _checkAccess($a_cmd, $a_permission, $a_ref_id, $a_obj_id, $a_user_id = "")
+	function _checkAccess(string $a_cmd, string $a_permission, int $a_ref_id, int $a_obj_id, ?int $a_user_id = null): bool
 	{
 		global $DIC;
 		global $tree;
 		$parent_ref_id = $tree->getParentId($a_ref_id);
 		$parent_id = ilObject::_lookupObjId($parent_ref_id);
 
-		if ($a_user_id == "")
+		if (!isset($a_user_id))
 		{
 			$a_user_id = $DIC->user()->getId();
 		}

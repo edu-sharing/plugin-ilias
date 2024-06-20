@@ -11,35 +11,32 @@ use EduSharingApiClient\EduSharingHelper;
  * @author Uwe Kohnle <kohnle@internetlehrer-gmbh.de>
   * @version $Id$
  *
+ * @ilCtrl_Calls ilLfEduSharingResourceConfigGUI: ilCommonActionDispatcherGUI
+ * @ilCtrl_IsCalledBy ilLfEduSharingResourceConfigGUI: ilObjComponentSettingsGUI
  */
 class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 {
-	/**
-	 * @var ilCtrl
-	 */
-	protected $ctrl;
-	/**
-	 * @var ilLfEduSharingResourcePlugin
-	 */
-	protected $pl;
-	/**
-	 * @var ilTabsGUI
-	 */
-	protected $tabs;
-	/**
-	 * @var ilTemplate
-	 */
-	protected $tpl;
+	protected ILIAS\DI\Container $dic;
 
-	private ?string $hostaliases  = null;
+	protected ilCtrl $ctrl;
+
+	protected ilLfEduSharingResourcePlugin $pl;
+
+	protected ilTabsGUI $tabs;
+
+	protected ilGlobalTemplateInterface $tpl;
+
+	private ?string $hostaliases = null;
 
 	private ?string $wloguestuser = null;
 
 	/**
 	 *
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		global $DIC;
+		$this->dic = $DIC;
 
 		$this->ctrl = $DIC->ctrl();
 		$this->pl = ilLfEduSharingResourcePlugin::getInstance();
@@ -50,10 +47,9 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 	/**
 	 * Handles all commmands, default is "configure"
 	 */
-	function performCommand($cmd)
+	public function performCommand($cmd) : void
 	{
-		switch ($cmd)
-		{
+		switch ($cmd) {
 			default:
 				$this->$cmd();
 				break;
@@ -63,28 +59,30 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 	/**
 	 * Configure screen
 	 */
-	function configure()
+	public function configure() : void
 	{
 		$form = $this->initConfigurationForm();
 		$this->setTabs("settings");
 		$this->tpl->setContent($form->getHTML());
 	}
-	
+
 	/**
 	 * import metadata from edu-sharing
-	 * 1/2 
+	 * 1/2
 	 */
-	public function importMetadata(){
+	public function importMetadata() : void
+	{
 		$this->setTabs("import_metadata");
 		$form = $this->importMetadataForm();
 		$this->tpl->setContent($form->getHTML());
-		
+
 	}
-	
-	public function importMetadataForm() {
+
+	public function importMetadataForm() : ilPropertyFormGUI
+	{
 		// settings object for EduSharing
 		$settings = new ilSetting("xedus");
-		
+
 		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
 
@@ -95,16 +93,17 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setInfo($this->pl->txt("metadata_endpoint_info"));
 		$ti->setValue($settings->get("metadata_endpoint"));
 		$form->addItem($ti);
-	
+
 		$form->addCommandButton("importMetadataSave", $this->pl->txt("metadata_import"));
-	                
+
 		$form->setTitle($this->pl->txt("import_application_metadata"));
 		$form->setFormAction($this->ctrl->getFormAction($this));
 
 		return $form;
 	}
-	
-	public function importMetadataSave() {
+
+	public function importMetadataSave()
+	{
 		$form = $this->importMetadataForm();
 		if ($form->checkInput()) {
 			try {
@@ -142,41 +141,45 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 				$curlConnection->close();
 				$curlConnection = null;
 				if (!$xml->loadXML($metadata)) {
-					ilUtil::sendFailure($this->pl->txt("import_metadata_failure"), true);
+					$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure',
+						$this->pl->txt("import_metadata_failure"), true);
 					$this->ctrl->redirect($this, "importMetadata");
 				}
 
 				$xml->preserveWhiteSpace = false;
-				$xml->formatOutput       = true;
-				$entries                 = $xml->getElementsByTagName('entry');
+				$xml->formatOutput = true;
+				$entries = $xml->getElementsByTagName('entry');
 				$settings = new ilSetting("xedus");
 				$settings->set("metadata_endpoint", $mde);
 
-				$repoid     = $settings->get('repository_appid');
+				$repoid = $settings->get('repository_appid');
 				$privatekey = $settings->get('application_private_key');
-				$publickey  = $settings->get('application_public_key');
+				$publickey = $settings->get('application_public_key');
 				foreach ($entries as $entry) {
-					$settings->set('repository_'.$entry->getAttribute('key'), $entry->nodeValue);
+					$settings->set('repository_' . $entry->getAttribute('key'), $entry->nodeValue);
 				}
 				if (empty ($host)) {
-					if (! empty($_SERVER['SERVER_ADDR'])) {
+					if (!empty($_SERVER['SERVER_ADDR'])) {
 						$host = $_SERVER['SERVER_ADDR'];
-					} else if (! empty($_SERVER['SERVER_NAME'])) {
-						$host = gethostbyname($_SERVER['SERVER_NAME']);
 					} else {
-						throw new Exception('Host could not be discerned. Cancelling ES-registration process.');
+						if (!empty($_SERVER['SERVER_NAME'])) {
+							$host = gethostbyname($_SERVER['SERVER_NAME']);
+						} else {
+							throw new Exception('Host could not be discerned. Cancelling ES-registration process.');
+						}
 					}
 				}
 
 				$clientprotocol = $settings->get('repository_clientprotocol');
-				$repodomain     = $settings->get('repository_domain');
-				$clientport     = $settings->get('repository_clientport');
+				$repodomain = $settings->get('repository_domain');
+				$clientport = $settings->get('repository_clientport');
 				$settings->set('application_host', $host);
-				$settings->set('application_appid', 'ILIAS_'.CLIENT_ID); //Todo?
+				$settings->set('application_appid', 'ILIAS_' . CLIENT_ID); //Todo?
 				$settings->set('application_type', 'LMS');
 				$settings->set('application_homerepid', $repoid);
 				$settings->set(
-					'application_cc_gui_url', $clientprotocol . '://' . $repodomain . ':' . $clientport . '/edu-sharing/'
+					'application_cc_gui_url',
+					$clientprotocol . '://' . $repodomain . ':' . $clientport . '/edu-sharing/'
 				);
 				if ($this->hostaliases !== null) {
 					$settings->set('application_host_aliases', $this->hostaliases);
@@ -195,7 +198,8 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 				}
 
 				if (empty($settings->get('application_private_key'))) {
-					ilUtil::sendFailure($this->pl->txt("generate_ssl_keys_failed"), true);
+					$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure',
+						$this->pl->txt("generate_ssl_keys_failed"), true);
 					$this->ctrl->redirect($this, "importMetadata");
 				}
 				$settings->set('application_blowfishkey', 'thetestkey');
@@ -208,41 +212,47 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 				$settings->set('EDU_AUTH_AFFILIATION', ''); //$CFG->siteidentifier
 				$settings->set('EDU_AUTH_AFFILIATION_NAME', ''); //$CFG->siteidentifier
 
-				ilUtil::sendSuccess($this->pl->txt("import_metadata_saved"), true);
+				//ilUtil::sendSuccess($this->pl->txt("import_metadata_saved"), true);
+				$this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->pl->txt("import_metadata_saved"),
+					true);
 				$this->ctrl->redirect($this, "configure");
 			} catch (Exception $e) {
-				ilUtil::sendFailure($this->pl->txt("import_metadata_failure").' '.$e->getMessage(), true);
-					$this->ctrl->redirect($this, "importMetadata");
+//				ilUtil::sendFailure($this->pl->txt("import_metadata_failure").' '.$e->getMessage(), true);
+				$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure',
+					$this->pl->txt("import_metadata_failure") . ' ' . $e->getMessage(), true);
+				$this->ctrl->redirect($this, "importMetadata");
 			}
 		}
 	}
-	
+
 	/**
 	 * Init configuration form.
-	 *
-	 * @return object form object
 	 */
-	public function initConfigurationForm()
+	public function initConfigurationForm(): ilPropertyFormGUI
 	{
 		// $this->setTabs("settings");
 
 		// settings object for EduSharing
 		$settings = new ilSetting("xedus");
 
-		$iliasDomain = substr(ILIAS_HTTP_PATH,7);
-		if (substr($iliasDomain,0,1) == "\/") $iliasDomain = substr($iliasDomain,1);
-		if (substr($iliasDomain,0,4) == "www.") $iliasDomain = substr($iliasDomain,4);
-		$iliasDomainRep = str_replace('/','',$iliasDomain).CLIENT_ID;
-		$iliasDomain .= ';'.CLIENT_ID;
+		$iliasDomain = substr(ILIAS_HTTP_PATH, 7);
+		if (substr($iliasDomain, 0, 1) == "\/") {
+			$iliasDomain = substr($iliasDomain, 1);
+		}
+		if (substr($iliasDomain, 0, 4) == "www.") {
+			$iliasDomain = substr($iliasDomain, 4);
+		}
+		$iliasDomainRep = str_replace('/', '', $iliasDomain) . CLIENT_ID;
+		$iliasDomain .= ';' . CLIENT_ID;
 
 		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
 
 		$sh = new ilFormSectionHeaderGUI();
 		$sh->setTitle($this->pl->txt('application_properties'));
-		$sh->setInfo('URL: '.ILIAS_HTTP_PATH.'/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/metadata.php');
+		$sh->setInfo('URL: ' . ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/metadata.php');
 		$form->addItem($sh);
-		
+
 		$ti = new ilTextInputGUI($this->pl->txt('application_appid'), 'application_appid');
 		$ti->setMaxLength(50);
 		$ti->setValue($settings->get('application_appid'));
@@ -257,12 +267,12 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setMaxLength(50);
 		$ti->setValue($settings->get('application_homerepid'));
 		$form->addItem($ti);
-		
+
 		$ti = new ilTextInputGUI($this->pl->txt('application_cc_gui_url'), 'application_cc_gui_url');
 		$ti->setMaxLength(50);
 		$ti->setValue($settings->get('application_cc_gui_url'));
 		$form->addItem($ti);
-		
+
 		$ti = new ilTextAreaInputGUI($this->pl->txt('application_private_key'), 'application_private_key');
 		// $ti->setMaxLength(50);
 		$ti->setValue($settings->get('application_private_key'));
@@ -273,7 +283,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setValue($settings->get('application_public_key'));
 		$form->addItem($ti);
 
-		if(version_compare($settings->get('repository_version'), '4.1' ) < 0) {
+		if (version_compare($settings->get('repository_version'), '4.1') < 0) {
 			$ti = new ilTextInputGUI($this->pl->txt('application_blowfishkey'), 'application_blowfishkey');
 			$ti->setMaxLength(50);
 			$ti->setValue($settings->get('application_blowfishkey'));
@@ -283,7 +293,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 			$ti->setValue($settings->get('application_blowfishiv'));
 			$form->addItem($ti);
 		}
-		
+
 		$sh = new ilFormSectionHeaderGUI();
 		$sh->setTitle($this->pl->txt('repository_properties'));
 		$form->addItem($sh);
@@ -308,7 +318,8 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setValue($settings->get('repository_domain'));
 		$form->addItem($ti);
 
-		$ti = new ilTextInputGUI($this->pl->txt('repository_authenticationwebservice_wsdl'), 'repository_authenticationwebservice_wsdl');
+		$ti = new ilTextInputGUI($this->pl->txt('repository_authenticationwebservice_wsdl'),
+			'repository_authenticationwebservice_wsdl');
 		$ti->setMaxLength(100);
 		$ti->setValue($settings->get('repository_authenticationwebservice_wsdl'));
 		$form->addItem($ti);
@@ -317,7 +328,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setMaxLength(50);
 		$ti->setValue($settings->get('repository_type'));
 		$form->addItem($ti);
-		
+
 		$ti = new ilTextInputGUI($this->pl->txt('repository_appid'), 'repository_appid');
 		$ti->setMaxLength(50);
 		$ti->setValue($settings->get('repository_appid'));
@@ -345,30 +356,36 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setRequired(true);
 		$form->addItem($ti);
 
-	    // Defaults according to locallib.php.
+		// Defaults according to locallib.php.
 		$sh = new ilFormSectionHeaderGUI();
 		$sh->setTitle($this->pl->txt('authentication_properties'));
 		$form->addItem($sh);
 
-        $rg = new ilRadioGroupInputGUI($this->pl->txt('edu_auth_key'), 'EDU_AUTH_KEY');
-        $rg->setRequired(true);
-        $rg->setValue($settings->get('EDU_AUTH_KEY'));
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_id'),'id', $this->pl->txt('edu_auth_id_info'));
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_idnumber'),'idnumber', $this->pl->txt('edu_auth_idnumber_info'));
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_email'),'email', $this->pl->txt('edu_auth_email_info'));
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_username'),'username', $this->pl->txt('edu_auth_username_info'));
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_idnumber_http_path_client_id'),'idnumber;http_path;client_id', $this->pl->txt('edu_auth_idnumber_http_path_client_id_info').' 6;'.$iliasDomain);
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_shibbolethuid'),'ShibbolethUId', $this->pl->txt('edu_auth_shibbolethuid_info'));
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_zoerr_auth'),'ZOERR_Auth', $this->pl->txt('edu_auth_zoerr_auth_info'));
-        $rg->addOption($ro);
-        $ro = new ilRadioOption($this->pl->txt('edu_auth_random_uid'), 'randomUId', $this->pl->txt('edu_auth_random_uid_info'). ' ' . ilCmiXapiUser::getIliasUuid());
-        $rg->addOption($ro);
+		$rg = new ilRadioGroupInputGUI($this->pl->txt('edu_auth_key'), 'EDU_AUTH_KEY');
+		$rg->setRequired(true);
+		$rg->setValue($settings->get('EDU_AUTH_KEY'));
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_id'), 'id', $this->pl->txt('edu_auth_id_info'));
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_idnumber'), 'idnumber',
+			$this->pl->txt('edu_auth_idnumber_info'));
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_email'), 'email', $this->pl->txt('edu_auth_email_info'));
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_username'), 'username',
+			$this->pl->txt('edu_auth_username_info'));
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_idnumber_http_path_client_id'), 'idnumber;http_path;client_id',
+			$this->pl->txt('edu_auth_idnumber_http_path_client_id_info') . ' 6;' . $iliasDomain);
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_shibbolethuid'), 'ShibbolethUId',
+			$this->pl->txt('edu_auth_shibbolethuid_info'));
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_zoerr_auth'), 'ZOERR_Auth',
+			$this->pl->txt('edu_auth_zoerr_auth_info'));
+		$rg->addOption($ro);
+		$ro = new ilRadioOption($this->pl->txt('edu_auth_random_uid'), 'randomUId',
+			$this->pl->txt('edu_auth_random_uid_info') . ' ' . ilCmiXapiUser::getIliasUuid());
+		$rg->addOption($ro);
 		$form->addItem($rg);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_param_name_userid'), 'EDU_AUTH_PARAM_NAME_USERID');
@@ -397,13 +414,13 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_affiliation'), 'EDU_AUTH_AFFILIATION');
 		$ti->setMaxLength(50);
-		$ti->setInfo($this->pl->txt('edu_auth_affiliation_info').' '.$iliasDomainRep);
+		$ti->setInfo($this->pl->txt('edu_auth_affiliation_info') . ' ' . $iliasDomainRep);
 		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION'));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_affiliation_name'), 'EDU_AUTH_AFFILIATION_NAME');
 		$ti->setMaxLength(50);
-		$ti->setInfo($this->pl->txt('edu_auth_affiliation_name_info').' '.$iliasDomainRep);
+		$ti->setInfo($this->pl->txt('edu_auth_affiliation_name_info') . ' ' . $iliasDomainRep);
 		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION_NAME'));
 		$form->addItem($ti);
 
@@ -413,12 +430,13 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		// if ($settings->get('EDU_AUTH_CONVEYGLOBALGROUPS') == '1') $cb->setChecked(true);
 		// $form->addItem($cb);
 
-		 $cb = new ilCheckboxInputGUI($this->pl->txt('send_additional_auth'), 'send_additional_auth');
-		 $cb->setInfo($this->pl->txt('send_additional_auth_info'));
-		 $cb->setValue('1');
-		 if ($settings->get('send_additional_auth') == '1') $cb->setChecked(true);
-		 $form->addItem($cb);
-
+		$cb = new ilCheckboxInputGUI($this->pl->txt('send_additional_auth'), 'send_additional_auth');
+		$cb->setInfo($this->pl->txt('send_additional_auth_info'));
+		$cb->setValue('1');
+		if ($settings->get('send_additional_auth') == '1') {
+			$cb->setChecked(true);
+		}
+		$form->addItem($cb);
 
 		$sh = new ilFormSectionHeaderGUI();
 		$sh->setTitle($this->pl->txt('guest_properties'));
@@ -427,7 +445,9 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$cb = new ilCheckboxInputGUI($this->pl->txt('edu_guest_option'), 'edu_guest_option');
 		$cb->setInfo($this->pl->txt('edu_guest_option_info'));
 		$cb->setValue('1');
-		if ($settings->get('edu_guest_option') == '1') $cb->setChecked(true);
+		if ($settings->get('edu_guest_option') == '1') {
+			$cb->setChecked(true);
+		}
 		$form->addItem($cb);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_guest_guest_id'), 'edu_guest_guest_id');
@@ -436,24 +456,22 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setValue($settings->get('edu_guest_guest_id'));
 		$form->addItem($ti);
 
-	
 		$form->addCommandButton("initConfigurationSave", $this->pl->txt("save"));
-	                
+
 		$form->setTitle($this->pl->txt("edus_configuration"));
 		$form->setFormAction($this->ctrl->getFormAction($this));
 
 		return $form;
 	}
-	
+
 	/**
 	 * Save form input
-	 *
 	 */
-	public function initConfigurationSave() {
-		
+	public function initConfigurationSave()
+	{
+
 		$form = $this->initConfigurationForm();
-		if ($form->checkInput())
-		{
+		if ($form->checkInput()) {
 			// use ilSetting to save
 			$settings = new ilSetting("xedus");
 
@@ -463,7 +481,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 			$settings->set('application_cc_gui_url', $form->getInput('application_cc_gui_url'));
 			$settings->set('application_private_key', $form->getInput('application_private_key'));
 			$settings->set('application_public_key', $form->getInput('application_public_key'));
-			if(version_compare($settings->get('repository_version'), '4.1' ) < 0) {
+			if (version_compare($settings->get('repository_version'), '4.1') < 0) {
 				$settings->set('application_blowfishkey', $form->getInput('application_blowfishkey'));
 				$settings->set('application_blowfishiv', $form->getInput('application_blowfishiv'));
 			}
@@ -472,7 +490,8 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 			$settings->set('repository_clientport', $form->getInput('repository_clientport'));
 			$settings->set('repository_port', $form->getInput('repository_port'));
 			$settings->set('repository_domain', $form->getInput('repository_domain'));
-			$settings->set('repository_authenticationwebservice_wsdl', $form->getInput('repository_authenticationwebservice_wsdl'));
+			$settings->set('repository_authenticationwebservice_wsdl',
+				$form->getInput('repository_authenticationwebservice_wsdl'));
 			$settings->set('repository_type', $form->getInput('repository_type'));
 			$settings->set('repository_appid', $form->getInput('repository_appid'));
 			$settings->set('repository_usagewebservice_wsdl', $form->getInput('repository_usagewebservice_wsdl'));
@@ -495,83 +514,75 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 
 			$settings->set('edu_guest_option', $form->getInput('edu_guest_option'));
 			$settings->set('edu_guest_guest_id', $form->getInput('edu_guest_guest_id'));
-			
-			ilUtil::sendSuccess($this->pl->txt("configuration_saved"), true);
+
+			$this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->pl->txt("configuration_saved"),
+				true);
 			$this->ctrl->redirect($this, "configure");
-		}
-		else
-		{
+		} else {
 			$form->setValuesByPost();
 			$this->tpl->setContent($form->getHtml());
 		}
 	}
-	
-	
-	/**
-	 * Init configuration form.
-	 *
-	 * @return object form object
-	 */
-	public function initConfigurationFormOLD()
-	{
 
-		// settings object for EduSharing
-		$settings = new ilSetting("xedus");
+//	/**
+//	 * Init configuration form.
+//	 * @return object form object
+//	 */
+//	public function initConfigurationFormOLD(): ilPropertyFormGUI
+//	{
+//
+//		// settings object for EduSharing
+//		$settings = new ilSetting("xedus");
+//
+//		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
+//		$form = new ilPropertyFormGUI();
+//
+//		// setting
+//		$ti = new ilTextInputGUI($this->pl->txt("config_dir"), "config_dir");
+//		$ti->setRequired(true);
+//		$ti->setMaxLength(200);
+//		$ti->setSize(40);
+//		$ti->setValue($settings->get("config_dir"));
+//		$form->addItem($ti);
+//
+//		$form->addCommandButton("save", $this->pl->txt("save"));
+//
+//		$form->setTitle($this->pl->txt("edus_configuration"));
+//		$form->setFormAction($this->ctrl->getFormAction($this));
+//
+//		return $form;
+//	}
 
-		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
-		$form = new ilPropertyFormGUI();
-	
-		// setting
-		$ti = new ilTextInputGUI($this->pl->txt("config_dir"), "config_dir");
-		$ti->setRequired(true);
-		$ti->setMaxLength(200);
-		$ti->setSize(40);
-		$ti->setValue($settings->get("config_dir"));
-		$form->addItem($ti);
-	
-		$form->addCommandButton("save", $this->pl->txt("save"));
-	                
-		$form->setTitle($this->pl->txt("edus_configuration"));
-		$form->setFormAction($this->ctrl->getFormAction($this));
-
-		return $form;
-	}
-	
 	/**
 	 * Save form input (currently does not save anything to db)
-	 *
 	 */
 	public function save()
 	{
-		
+
 		$form = $this->initConfigurationForm();
-		if ($form->checkInput())
-		{
+		if ($form->checkInput()) {
 			$cd = $form->getInput("config_dir");
-	
+
 			// use ilSetting to save
 			$settings = new ilSetting("xedus");
 			$settings->set("config_dir", $cd);
-			
-			ilUtil::sendSuccess($this->pl->txt("configuration_saved"), true);
+
+			$this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->pl->txt("configuration_saved"),
+				true);
 			$this->ctrl->redirect($this, "configure");
-		}
-		else
-		{
+		} else {
 			$form->setValuesByPost();
 			$this->tpl->setContent($form->getHtml());
 		}
 	}
-	
-	
+
 	/**
 	 * Set tabs
-	 *
 	 */
 	function setTabs($a_active) : void
 	{
 		// $pl = $this->getPluginObject();
-		
+
 		$this->tabs->addTab("settings",
 			$this->pl->txt("settings"),
 			$this->ctrl->getLinkTarget($this, "configure"));
@@ -579,9 +590,9 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$this->tabs->addTab("import_metadata",
 			$this->pl->txt("import_metadata"),
 			$this->ctrl->getLinkTarget($this, "importMetadata"));
-			
+
 		$this->tabs->activateTab($a_active);
 	}
-	
+
 }
 ?>

@@ -10,6 +10,7 @@ const EDUSHARING_DISPLAY_MODE_INLINE = 'inline';
 class EduSharingUtilityFunctions
 {
 
+    protected ILIAS\DI\Container $dic;
 //    private ?AppConfig $appConfig;
 
 //    /**
@@ -22,6 +23,8 @@ class EduSharingUtilityFunctions
 //        $this->init();
 //    }
     public function __construct() {
+        global $DIC;
+        $this->dic = $DIC;
     }
     /**
      * Function init
@@ -47,7 +50,7 @@ class EduSharingUtilityFunctions
         $objectId = parse_url($url, PHP_URL_PATH);
         if ($objectId === false) {
             try {
-                ilUtil::sendFailure('error_get_object_id_from_url', true);
+                $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure','error_get_object_id_from_url', true);
 //                trigger_error(get_string('error_get_object_id_from_url', 'edusharing'), E_USER_WARNING);
             } catch (Exception $exception) {
                 unset($exception);
@@ -72,7 +75,7 @@ class EduSharingUtilityFunctions
     public function getRepositoryIdFromUrl(string $url): string {
         $repoId = parse_url($url, PHP_URL_HOST);
         if ($repoId === false) {
-            ilUtil::sendFailure('error_get_repository_id_from_url',true);
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'error_get_repository_id_from_url',true);
 //            throw new Exception(get_string('error_get_repository_id_from_url', 'edusharing'));
         }
 
@@ -92,13 +95,14 @@ class EduSharingUtilityFunctions
 //        try {
             $repoId = $this->getRepositoryIdFromUrl($eduSharing->getUri()); //object_url
 //        } catch (Exception $exception) {
-//            ilUtil::sendFailure($exception->getMessage(), true);
+//            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $exception->getMessage(), true);
 ////            error_log($exception->getMessage());
 //            return '';
 //        }
         $url     .= '&rep_id=' . urlencode($repoId);
         $url     .= '&obj_id=' . urlencode($this->getObjectIdFromUrl($eduSharing->getUri()));//object_url
-        $url     .= '&resource_id=' . urlencode($eduSharing->id);
+//        $url     .= '&resource_id=' . urlencode($eduSharing->id);
+        $url     .= '&resource_id=' . urlencode($eduSharing->getId());
         $url     .= '&course_id=' . urlencode($eduSharing->getUpperCourse());//course
 //        $context = context_course::instance($eduSharing->course);
 //        $roles   = get_user_roles($context, $USER->id);
@@ -224,7 +228,7 @@ class EduSharingUtilityFunctions
      * @param int $length
      * @return string
      */
-    protected function getUserObjectUniqueId( $length = 32 ) : string
+    protected function getUserObjectUniqueId( int $length = 32 ) : string
     {
         $id = ilCmiXapiUser::getUUID($length);
         $exists = $this->userUniqueIdExists($id);
@@ -259,7 +263,7 @@ class EduSharingUtilityFunctions
         $key       = openssl_get_publickey($this->getConfigEntry('repository_public_key'));
         openssl_public_encrypt($data, $encrypted, $key);
         if (!openssl_public_encrypt($data, $encrypted, $key)) {
-            ilUtil::sendFailure('error_encrypt_with_repo_public',true);
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'error_encrypt_with_repo_public',true);
 //            trigger_error(get_string('error_encrypt_with_repo_public', 'edusharing'), E_USER_WARNING);
             return '';
         }

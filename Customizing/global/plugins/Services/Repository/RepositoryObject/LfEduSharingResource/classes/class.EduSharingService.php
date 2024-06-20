@@ -18,6 +18,7 @@ use EduSharingApiClient\UsageDeletedException;
 
 class EduSharingService
 {
+    protected ILIAS\DI\Container $dic;
     private ?EduSharingAuthHelper $authHelper;
     private ?EduSharingNodeHelper $nodeHelper;
     private ?EduSharingUtilityFunctions     $utils;
@@ -32,6 +33,8 @@ class EduSharingService
      * @throws Exception
      */
     public function __construct(?EduSharingAuthHelper $authHelper = null, ?EduSharingNodeHelper $nodeHelper = null, ?EduSharingUtilityFunctions $utils = null) {
+        global $DIC;
+        $this->dic = $DIC;
         $this->authHelper = $authHelper;
         $this->nodeHelper = $nodeHelper;
         $this->utils      = $utils;
@@ -64,7 +67,6 @@ class EduSharingService
     /**
      * Function createUsage
      *
-     * @throws JsonException
      * @throws Exception
      */
     public function createUsage(stdClass $usageData): Usage {
@@ -165,7 +167,7 @@ class EduSharingService
      */
     public function addInstance(ilObjLfEduSharingResource $eduSharing, ?int $updateTime = null): bool
     {
-        global $DB;
+        global $DIC;
 
         $eduSharing->timecreated  = $updateTime ?? time();
         $eduSharing->timemodified = $updateTime ?? time();
@@ -173,8 +175,9 @@ class EduSharingService
         // You may have to add extra stuff in here.
         $this->postProcessEdusharingObject($eduSharing, $updateTime);
 
-        if (isset($_POST['object_version']) && $_POST['object_version'] != '0') {
-            $eduSharing->object_version = $_POST['object_version'];
+        if ($DIC->http()->wrapper()->post()->has('object_version')
+            && $DIC->http()->wrapper()->post()->retrieve('object_version', $DIC->refinery()->kindlyTo()->string()) != '0') {
+            $eduSharing->object_version = $DIC->http()->wrapper()->post()->retrieve('object_version', $DIC->refinery()->kindlyTo()->string());
         }
         //use simple version handling for atto plugin or legacy code
 //        if (isset($eduSharing->editor_atto)) {
@@ -198,7 +201,8 @@ class EduSharingService
         $usageData->nodeVersion = $eduSharing->object_version;
 //        try {
             $usage                = $this->createUsage($usageData);
-            $eduSharing->id       = $eduSharing->getId();//$id;
+//            $eduSharing->id       = $eduSharing->getId();//$id;
+            $id = $eduSharing->getId();//$id;
             $eduSharing->usage_id = $usage->usageId;
 //            $DB->update_record('edusharing', $eduSharing);
             return true;
@@ -262,7 +266,8 @@ class EduSharingService
      * @param int|null $updateTime
      * @return void
      */
-    private function postProcessEdusharingObject(ilObjLfEduSharingResource $edusharing, ?int $updateTime = null): void {
+    private function postProcessEdusharingObject(ilObjLfEduSharingResource $edusharing, ?int $updateTime = null): void
+    {
         if ($updateTime === null) {
             $updateTime = time();
         }
@@ -288,7 +293,7 @@ class EduSharingService
         $course_id = $edusharing->getUpperCourse();
         if ($course_id == 0) {
             ilLoggerFactory::getLogger('xesr')->warning('set usage: no upper object ref id given.');
-            ilUtil::sendFailure('set usage: no upper object ref id given.');
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'set usage: no upper object ref id given.');
         }
         if (empty($edusharing->course) || !$edusharing->course) {
             $edusharing->course = $course_id;
