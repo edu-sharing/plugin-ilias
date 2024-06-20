@@ -15,15 +15,15 @@ chdir("../../../../../../../");
 
 // Avoid redirection to start screen
 // (see ilInitialisation::InitILIAS for details)
-$_GET["baseClass"] = "ilStartUpGUI";
+//$_GET["baseClass"] = "ilStartUpGUI";
 
 require_once "./include/inc.header.php";
-
-$plugin = new ilLfEduSharingPageComponentPlugin();
+global $DIC;
+$plugin = new ilLfEduSharingPageComponentPlugin($DIC->database(), $DIC["component.repository"], "xesp");
 
 $settings = new ilSetting("xedus");
 
-$plugin->setVars($_GET['resId']);
+$plugin->setVars($DIC->http()->wrapper()->query()->retrieve('resId', $DIC->refinery()->kindlyTo()->int()));//$_GET['resId']
 
 $eduObj = new ilObjLfEduSharingResource();
 $eduObj->setUri($plugin->getUri());

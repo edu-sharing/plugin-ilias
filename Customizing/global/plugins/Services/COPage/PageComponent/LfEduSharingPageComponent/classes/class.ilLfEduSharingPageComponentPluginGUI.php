@@ -9,20 +9,13 @@
 use EduSharingApiClient\EduSharingHelperBase;
 class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 
-	/** @var  ilLanguage $lng */
-	protected $lng;
+	protected ilLanguage $lng;
 
-	/** @var  ilCtrl $ctrl */
-	protected $ctrl;
+	protected ilCtrl $ctrl;
 
-	/** @var  ilTemplate $tpl */
-	protected $tpl;
-	/**
-	 * Fix autocomplete (Defined in parent)
-	 *
-	 * @var ilLfEduSharingPageComponentPlugin
-	 */
-	protected $plugin;
+	protected ilGlobalPageTemplate $tpl;
+
+	protected \ilPageComponentPlugin $plugin;
 
 
 	public function __construct() {
@@ -34,7 +27,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	}
 
 
-	public function executeCommand() {
+	public function executeCommand(): void {
 		$next_class = $this->ctrl->getNextClass();
 		switch($next_class)
 		{
@@ -69,7 +62,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	/**
 	 * Save new element
 	 */
-	public function create() {
+	public function create(): void {
 		global $DIC;
 		$properties = $this->getProperties();
 		
@@ -94,19 +87,31 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             $this->plugin->setResId($this->plugin->addUsage(""));
             $properties['resId'] = $this->plugin->getResId();
 			$resId = $properties['resId'];
-			if ($resId == "") $resId = $_REQUEST["resId"]; //Problem in 5.2 nur bei erstem Eintrag! Datenbankeintrag vorhanden.
-			$eduuri = ilUtil::stripSlashes($_REQUEST["nodeId"]);
+
+			if (!isset($resId)) {
+//                $resId = $_REQUEST["resId"];//Problem in 5.2 nur bei erstem Eintrag! Datenbankeintrag vorhanden.
+                $resId = ilUtil::stripSlashes($DIC->http()->wrapper()->query()->retrieve("resId", $DIC->refinery()->kindlyTo()->int()));
+            }
+//			$eduuri = ilUtil::stripSlashes($_REQUEST["nodeId"]);
+        $eduuri = ilUtil::stripSlashes($DIC->http()->wrapper()->query()->retrieve("nodeId", $DIC->refinery()->kindlyTo()->string()));
 			$this->plugin->setResId($resId);
 			$this->plugin->setUri($eduuri);
-			$this->plugin->setMimetype($_REQUEST["mimeType"]);
-			$this->plugin->setObjectVersion($_REQUEST["v"]);
-			$this->plugin->setWindowWidthOrg($_REQUEST["w"]);
-			$this->plugin->setWindowHeightOrg($_REQUEST["h"]);
-			$this->plugin->setWindowWidth($_REQUEST["w"]);
-			$this->plugin->setWindowHeight($_REQUEST["h"]);
-			
+
+//			$this->plugin->setMimetype($_REQUEST["mimeType"]);
+        $this->plugin->setMimetype($DIC->http()->wrapper()->query()->retrieve("mimeType", $DIC->refinery()->kindlyTo()->string()));
+//			$this->plugin->setObjectVersion($_REQUEST["v"]);
+        $this->plugin->setObjectVersion($DIC->http()->wrapper()->query()->retrieve("v", $DIC->refinery()->kindlyTo()->string()));
+//			$this->plugin->setWindowWidthOrg($_REQUEST["w"]);
+        $this->plugin->setWindowWidthOrg($DIC->http()->wrapper()->query()->retrieve("w", $DIC->refinery()->kindlyTo()->int()));
+//			$this->plugin->setWindowHeightOrg($_REQUEST["h"]);
+        $this->plugin->setWindowHeightOrg($DIC->http()->wrapper()->query()->retrieve("h", $DIC->refinery()->kindlyTo()->int()));
+//			$this->plugin->setWindowWidth($_REQUEST["w"]);
+        $this->plugin->setWindowWidth($DIC->http()->wrapper()->query()->retrieve("w", $DIC->refinery()->kindlyTo()->int()));
+//			$this->plugin->setWindowHeight($_REQUEST["h"]);
+        $this->plugin->setWindowHeight($DIC->http()->wrapper()->query()->retrieve("h", $DIC->refinery()->kindlyTo()->int()));
+
 			if ($this->plugin->updateUsage($resId) == true) {
-				ilUtil::sendSuccess($this->lng->txt("msg_obj_created"), true);
+                $DIC->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt("msg_obj_created"), true);
 			}
             $this->createElement($properties);
 
@@ -118,7 +123,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             $usageResult = $service->addInstance($eduObj);
             if ($usageResult == false) {
                 //delete
-                ilUtil::sendFailure("Create failed (usageResult = false)", true);
+                $DIC->ui()->mainTemplate()->setOnScreenMessage('failure', "Create failed (usageResult = false)", true);
                 $this->returnToParent();
             }
 
@@ -129,9 +134,9 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	/**
 	 * Edit
 	 */
-	public function edit() {
+	public function edit(): void {
 		$properties = $this->getProperties();
-        $this->plugin->setVars($properties['resId']);
+        $this->plugin->setVars((int) $properties['resId']);
         $form = $this->editform();
 		$this->tpl->setContent($form->getHTML());
 	}
@@ -141,19 +146,27 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	 */
 	public function update()
 	{
+        global $DIC;
+
 		$resId = 0;
-		$resId = $_POST["resId"];
+//		$resId = $_POST["resId"];
+        if ($DIC->http()->wrapper()->post()->has('resId')) {
+            $resId = $DIC->http()->wrapper()->post()->retrieve('resId', $DIC->refinery()->kindlyTo()->int());
+        }
 		$this->plugin->setVars($resId);
 		if ($this->plugin->getWindowWidthOrg() > 0) {
-			$this->plugin->setWindowWidth($_POST["window_width"]);
+			$this->plugin->setWindowWidth($DIC->http()->wrapper()->post()->retrieve('window_width', $DIC->refinery()->kindlyTo()->int()));
 			$scaleFactor = $this->plugin->getWindowWidth() / $this->plugin->getWindowWidthOrg();
 			$newHeight = round($scaleFactor * $this->plugin->getWindowHeightOrg());
 			$this->plugin->setWindowHeight($newHeight);
 		}
-		$this->plugin->setWindowFloat($_POST["window_float"]);
-		$this->plugin->setObjectVersionUseExact($_POST["object_version_use_exact"]);
+		$this->plugin->setWindowFloat($DIC->http()->wrapper()->post()->retrieve('window_float', $DIC->refinery()->kindlyTo()->string()));
+        if ($DIC->http()->wrapper()->post()->has('object_version_use_exact')) {
+            $this->plugin->setObjectVersionUseExact($DIC->http()->wrapper()->post()->retrieve('object_version_use_exact',
+                $DIC->refinery()->kindlyTo()->int()));
+        }
 		if ($this->plugin->updateUsage($resId) == true) {
-			ilUtil::sendSuccess($this->lng->txt("msg_obj_modified"), true);
+            $DIC->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt("msg_obj_modified"), true);
 		}
         $form = $this->editform();
 		$this->tpl->setContent($form->getHTML());
@@ -164,7 +177,8 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	 * Init editing form
 	 *
 	 */
-	protected function editform() {
+	protected function editform() : ilPropertyFormGUI
+    {
 		global $DIC;
         $resId = $this->plugin->getResId();
 
@@ -251,11 +265,10 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 
 	/**
 	 * Get HTML for element
-	 *
 	 * @param string $a_mode //(edit, presentation, print, preview, offline)
 	 * @return string   html code
 	 */
-	public function getElementHTML($a_mode, array $a_properties, $plugin_version): string
+	public function getElementHTML(string $a_mode, array $a_properties, string $plugin_version): string
 	{
 		$this->plugin->setResId($a_properties['resId']);
 		$this->plugin->setVars($a_properties['resId']);
@@ -324,13 +337,13 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 
     /**
      * Get rendered object via curl
-     *
      * @param string $url
      * @return string
      * @throws Exception
      */
-    public function filter_edusharing_get_render_html($url): string
+    public function filter_edusharing_get_render_html(string $url) : string
     {
+        global $DIC;
 		$inline = "";
         try {
             $curlhandle = curl_init($url);
@@ -351,12 +364,12 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 			$inline = curl_exec($curlhandle);
 			if($inline === false) {
 				ilLoggerFactory::getLogger('xesp')->warning(curl_error($curlhandle));
-				ilUtil::sendFailure($this->plugin->txt("not_visible_now").' '.curl_error($curlhandle), true);
+                $DIC->ui()->mainTemplate()->setOnScreenMessage('failure', $this->plugin->txt("not_visible_now") . ' ' . curl_error($curlhandle), true);
                 $inline = "";
 			}
         } catch (Exception $e) {
 			ilLoggerFactory::getLogger('xesp')->warning($e->getMessage());
-			ilUtil::sendFailure($this->plugin->txt("not_visible_now").' '.$e->getMessage(), true);
+            $DIC->ui()->mainTemplate()->setOnScreenMessage('failure', $this->plugin->txt("not_visible_now") . ' ' . $e->getMessage(), true);
         }
         curl_close($curlhandle);
         return $inline;
@@ -367,6 +380,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
      */
     public function filter_edusharing_display(string $html): string
     {
+        global $DIC;
 
 		$resid = $this->plugin->getResId();
 		
@@ -377,13 +391,15 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
          */
         $html = str_replace(
             '{{{LMS_INLINE_HELPER_SCRIPT}}}',
-            ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resid . "&ref_id=" . $_GET['ref_id'],
+            ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resid .
+            "&ref_id=" . $DIC->http()->wrapper()->query()->retrieve('ref_id', $DIC->refinery()->kindlyTo()->string()),
             $html);
 
         return $html;
     }
 
-	protected function getTicket() {
+	protected function getTicket() : string
+    {
         $eduSharingService = new EduSharingService();
         return $eduSharingService->getTicket();
 	}
