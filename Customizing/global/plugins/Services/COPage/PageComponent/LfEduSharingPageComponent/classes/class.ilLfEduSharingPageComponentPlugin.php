@@ -278,7 +278,7 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
         if ($this->getUri() !== null && $org_obj != $this->getObjID()) {
             $service = new EduSharingService();
             $eduObj = new ilObjLfEduSharingResource();
-            $eduObj->containerId = $this->getUpperCourse();
+//            $eduObj->containerId = $this->getUpperCourse();//deprecated
             $eduObj->setUri($this->getUri());
             $eduObj->setId($id);
             $eduObj->setRefId($this->getRefId());

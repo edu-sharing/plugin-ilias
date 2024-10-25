@@ -22,6 +22,7 @@ use EduSharingApiClient\EduSharingHelperBase;
 class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 {
 
+	protected ilPropertyFormGUI $form;
 	/**
 	 * Initialisation
 	 */

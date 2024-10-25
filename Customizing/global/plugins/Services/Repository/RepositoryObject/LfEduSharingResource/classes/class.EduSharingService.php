@@ -169,8 +169,8 @@ class EduSharingService
     {
         global $DIC;
 
-        $eduSharing->timecreated  = $updateTime ?? time();
-        $eduSharing->timemodified = $updateTime ?? time();
+//        $eduSharing->timecreated  = $updateTime ?? time();//deprecated
+//        $eduSharing->timemodified = $updateTime ?? time();//deprecated
 
         // You may have to add extra stuff in here.
         $this->postProcessEdusharingObject($eduSharing, $updateTime);
@@ -203,7 +203,7 @@ class EduSharingService
             $usage                = $this->createUsage($usageData);
 //            $eduSharing->id       = $eduSharing->getId();//$id;
             $id = $eduSharing->getId();//$id;
-            $eduSharing->usage_id = $usage->usageId;
+//            $eduSharing->usage_id = $usage->usageId;//deprecated
 //            $DB->update_record('edusharing', $eduSharing);
             return true;
 //        } catch (Exception $exception) {
@@ -273,22 +273,22 @@ class EduSharingService
         }
 //        global $COURSE;
         if (empty($edusharing->timecreated)) {
-            $edusharing->timecreated = $updateTime;
+//            $edusharing->timecreated = $updateTime;//deprecated
         }
-        $edusharing->timeupdated = $updateTime;
+//        $edusharing->timeupdated = $updateTime;//deprecated
         if (!empty($edusharing->force_download)) {
             $edusharing->force_download = 1;
-            $edusharing->popup_window   = 0;
+//            $edusharing->popup_window   = 0;//deprecated
         } else if (!empty($edusharing->popup_window)) {
-            $edusharing->force_download = 0;
-            $edusharing->options        = '';
+//            $edusharing->force_download = 0;//deprecated
+//            $edusharing->options        = '';//deprecated
         } else {
             if (empty($edusharing->blockdisplay)) {
-                $edusharing->options = '';
+//                $edusharing->options = '';//deprecated
             }
-            $edusharing->popup_window = '';
+//            $edusharing->popup_window = '';//deprecated
         }
-        $edusharing->tracking = empty($edusharing->tracking) ? 0 : $edusharing->tracking;
+//        $edusharing->tracking = empty($edusharing->tracking) ? 0 : $edusharing->tracking;//deprecated
         //added
         $course_id = $edusharing->getUpperCourse();
         if ($course_id == 0) {
@@ -296,7 +296,7 @@ class EduSharingService
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'set usage: no upper object ref id given.');
         }
         if (empty($edusharing->course) || !$edusharing->course) {
-            $edusharing->course = $course_id;
+//            $edusharing->course = $course_id;//deprecated
         }
     }
 
