@@ -123,3 +123,4 @@ not_visible_now#:#The resource cannot be displayed temporarily.
 no_resource_set#:#No resource was set. The settings for this object should be checked.
 send_additional_auth#:#Send additional auth information
 send_additional_auth_info#:#If checked, the app authentication request will include the first and last name as well as email address.
+error_get_zoerr_auth#:#ZOERR authentication failed due to missing data. Guest access is used instead.

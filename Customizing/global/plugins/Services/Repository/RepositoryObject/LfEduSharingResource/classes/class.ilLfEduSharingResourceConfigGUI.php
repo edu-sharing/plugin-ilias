@@ -91,7 +91,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti->setMaxLength(200);
 		$ti->setSize(40);
 		$ti->setInfo($this->pl->txt("metadata_endpoint_info"));
-		$ti->setValue($settings->get("metadata_endpoint"));
+		$ti->setValue($settings->get("metadata_endpoint", ''));
 		$form->addItem($ti);
 
 		$form->addCommandButton("importMetadataSave", $this->pl->txt("metadata_import"));
@@ -152,9 +152,9 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 				$settings = new ilSetting("xedus");
 				$settings->set("metadata_endpoint", $mde);
 
-				$repoid = $settings->get('repository_appid');
-				$privatekey = $settings->get('application_private_key');
-				$publickey = $settings->get('application_public_key');
+				$repoid = $settings->get('repository_appid', '');
+				$privatekey = $settings->get('application_private_key', '');
+				$publickey = $settings->get('application_public_key', '');
 				foreach ($entries as $entry) {
 					$settings->set('repository_' . $entry->getAttribute('key'), $entry->nodeValue);
 				}
@@ -170,9 +170,9 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 					}
 				}
 
-				$clientprotocol = $settings->get('repository_clientprotocol');
-				$repodomain = $settings->get('repository_domain');
-				$clientport = $settings->get('repository_clientport');
+				$clientprotocol = $settings->get('repository_clientprotocol', '');
+				$repodomain = $settings->get('repository_domain', '');
+				$clientport = $settings->get('repository_clientport', '');
 				$settings->set('application_host', $host);
 				$settings->set('application_appid', 'ILIAS_' . CLIENT_ID); //Todo?
 				$settings->set('application_type', 'LMS');
@@ -255,42 +255,42 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 
 		$ti = new ilTextInputGUI($this->pl->txt('application_appid'), 'application_appid');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('application_appid'));
+		$ti->setValue($settings->get('application_appid', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('application_type'), 'application_type');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('application_type'));
+		$ti->setValue($settings->get('application_type', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('application_homerepid'), 'application_homerepid');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('application_homerepid'));
+		$ti->setValue($settings->get('application_homerepid', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('application_cc_gui_url'), 'application_cc_gui_url');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('application_cc_gui_url'));
+		$ti->setValue($settings->get('application_cc_gui_url', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextAreaInputGUI($this->pl->txt('application_private_key'), 'application_private_key');
 		// $ti->setMaxLength(50);
-		$ti->setValue($settings->get('application_private_key'));
+		$ti->setValue($settings->get('application_private_key', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextAreaInputGUI($this->pl->txt('application_public_key'), 'application_public_key');
 		// $ti->setMaxLength(50);
-		$ti->setValue($settings->get('application_public_key'));
+		$ti->setValue($settings->get('application_public_key', ''));
 		$form->addItem($ti);
 
-		if (version_compare($settings->get('repository_version'), '4.1') < 0) {
+		if (version_compare($settings->get('repository_version', ''), '4.1') < 0) {
 			$ti = new ilTextInputGUI($this->pl->txt('application_blowfishkey'), 'application_blowfishkey');
 			$ti->setMaxLength(50);
-			$ti->setValue($settings->get('application_blowfishkey'));
+			$ti->setValue($settings->get('application_blowfishkey', ''));
 			$form->addItem($ti);
 			$ti = new ilTextInputGUI($this->pl->txt('application_blowfishiv'), 'application_blowfishiv');
 			$ti->setMaxLength(50);
-			$ti->setValue($settings->get('application_blowfishiv'));
+			$ti->setValue($settings->get('application_blowfishiv', ''));
 			$form->addItem($ti);
 		}
 
@@ -300,58 +300,58 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 
 		$ti = new ilTextAreaInputGUI($this->pl->txt('repository_public_key'), 'repository_public_key');
 		// $ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_public_key'));
+		$ti->setValue($settings->get('repository_public_key', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_clientport'), 'repository_clientport');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_clientport'));
+		$ti->setValue($settings->get('repository_clientport', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_port'), 'repository_port');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_port'));
+		$ti->setValue($settings->get('repository_port', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_domain'), 'repository_domain');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_domain'));
+		$ti->setValue($settings->get('repository_domain', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_authenticationwebservice_wsdl'),
 			'repository_authenticationwebservice_wsdl');
 		$ti->setMaxLength(100);
-		$ti->setValue($settings->get('repository_authenticationwebservice_wsdl'));
+		$ti->setValue($settings->get('repository_authenticationwebservice_wsdl', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_type'), 'repository_type');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_type'));
+		$ti->setValue($settings->get('repository_type', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_appid'), 'repository_appid');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_appid'));
+		$ti->setValue($settings->get('repository_appid', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_usagewebservice_wsdl'), 'repository_usagewebservice_wsdl');
 		$ti->setMaxLength(100);
-		$ti->setValue($settings->get('repository_usagewebservice_wsdl'));
+		$ti->setValue($settings->get('repository_usagewebservice_wsdl', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_protocol'), 'repository_protocol');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_protocol'));
+		$ti->setValue($settings->get('repository_protocol', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_host'), 'repository_host');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_host'));
+		$ti->setValue($settings->get('repository_host', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('repository_version'), 'repository_version');
 		$ti->setMaxLength(50);
-		$ti->setValue($settings->get('repository_version'));
+		$ti->setValue($settings->get('repository_version', ''));
 		$ti->setInfo($this->pl->txt('repository_version_info'));
 		$ti->setRequired(true);
 		$form->addItem($ti);
@@ -363,7 +363,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 
 		$rg = new ilRadioGroupInputGUI($this->pl->txt('edu_auth_key'), 'EDU_AUTH_KEY');
 		$rg->setRequired(true);
-		$rg->setValue($settings->get('EDU_AUTH_KEY'));
+		$rg->setValue($settings->get('EDU_AUTH_KEY', ''));
 		$ro = new ilRadioOption($this->pl->txt('edu_auth_id'), 'id', $this->pl->txt('edu_auth_id_info'));
 		$rg->addOption($ro);
 		$ro = new ilRadioOption($this->pl->txt('edu_auth_idnumber'), 'idnumber',
@@ -391,37 +391,37 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_param_name_userid'), 'EDU_AUTH_PARAM_NAME_USERID');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_auth_param_name_userid_info'));
-		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_USERID'));
+		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_USERID', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_param_name_lastname'), 'EDU_AUTH_PARAM_NAME_LASTNAME');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_auth_param_name_lastname_info'));
-		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_LASTNAME'));
+		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_LASTNAME', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_param_name_firstname'), 'EDU_AUTH_PARAM_NAME_FIRSTNAME');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_auth_param_name_firstname_info'));
-		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_FIRSTNAME'));
+		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_FIRSTNAME', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_param_name_email'), 'EDU_AUTH_PARAM_NAME_EMAIL');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_auth_param_name_email_info'));
-		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_EMAIL'));
+		$ti->setValue($settings->get('EDU_AUTH_PARAM_NAME_EMAIL', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_affiliation'), 'EDU_AUTH_AFFILIATION');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_auth_affiliation_info') . ' ' . $iliasDomainRep);
-		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION'));
+		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION', ''));
 		$form->addItem($ti);
 
 		$ti = new ilTextInputGUI($this->pl->txt('edu_auth_affiliation_name'), 'EDU_AUTH_AFFILIATION_NAME');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_auth_affiliation_name_info') . ' ' . $iliasDomainRep);
-		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION_NAME'));
+		$ti->setValue($settings->get('EDU_AUTH_AFFILIATION_NAME', ''));
 		$form->addItem($ti);
 
 		// $cb = new ilCheckboxInputGUI($this->pl->txt('edu_auth_conveyglobalgroups'), 'EDU_AUTH_CONVEYGLOBALGROUPS');
@@ -453,7 +453,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$ti = new ilTextInputGUI($this->pl->txt('edu_guest_guest_id'), 'edu_guest_guest_id');
 		$ti->setMaxLength(50);
 		$ti->setInfo($this->pl->txt('edu_guest_guest_id_info'));
-		$ti->setValue($settings->get('edu_guest_guest_id'));
+		$ti->setValue($settings->get('edu_guest_guest_id', ''));
 		$form->addItem($ti);
 
 		$form->addCommandButton("initConfigurationSave", $this->pl->txt("save"));
@@ -481,7 +481,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 			$settings->set('application_cc_gui_url', $form->getInput('application_cc_gui_url'));
 			$settings->set('application_private_key', $form->getInput('application_private_key'));
 			$settings->set('application_public_key', $form->getInput('application_public_key'));
-			if (version_compare($settings->get('repository_version'), '4.1') < 0) {
+			if (version_compare($settings->get('repository_version', ''), '4.1') < 0) {
 				$settings->set('application_blowfishkey', $form->getInput('application_blowfishkey'));
 				$settings->set('application_blowfishiv', $form->getInput('application_blowfishiv'));
 			}

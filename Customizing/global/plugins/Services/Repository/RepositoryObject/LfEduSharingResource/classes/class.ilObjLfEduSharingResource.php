@@ -152,7 +152,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		$result = $db->query($query);
 		while ($row = $result->fetchAssoc()) {
 			$this->setUri($row['edus_uri']);
-			$this->setOnline($row["is_online"]);
+			$this->setOnline((int) $row["is_online"]);
 			$this->setObjectVersion($row['object_version']);
 			$this->setObjectVersionUseExact($row['object_version_use_exact']);
 			// $this->set($row['timecreated']);

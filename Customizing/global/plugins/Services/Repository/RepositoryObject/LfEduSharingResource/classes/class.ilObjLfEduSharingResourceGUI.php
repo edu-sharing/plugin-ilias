@@ -224,7 +224,7 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		if ($this->form->checkInput()) {
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
-			$this->object->setOnline($this->form->getInput("online"));
+			$this->object->setOnline((int) $this->form->getInput("online"));
 			$this->object->setObjectVersionUseExact((int) $this->form->getInput("object_version_use_exact"));
 			$this->object->update();
 			$DIC->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt("msg_obj_modified"), true);
