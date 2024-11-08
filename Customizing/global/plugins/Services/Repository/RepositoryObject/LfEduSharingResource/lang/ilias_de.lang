@@ -123,3 +123,4 @@ not_visible_now#:#Die Ressource kann vorübergehend nicht angezeigt werden.
 no_resource_set#:#Keine Ressource wurde ausgewählt. Die Einstellungen sollten bei diesem Objekt überprüft werden.
 send_additional_auth#:#Übermittlung zusätzlicher Authentifizierungsinfos
 send_additional_auth_info#:#Ist diese Option aktiviert, werden bei der app auth Anfrage Vor- und Nachname sowie E-Mail-Addresse übermittelt.
+error_get_zoerr_auth#:#Die ZOERR-Authentifizierung misslang wegen fehlender Daten. Ersatzweise wird der Gastzugang verwendet.

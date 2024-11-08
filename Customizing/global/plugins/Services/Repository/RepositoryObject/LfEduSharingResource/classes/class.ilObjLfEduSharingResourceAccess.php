@@ -58,8 +58,8 @@ class ilObjLfEduSharingResourceAccess extends ilObjectPluginAccess
 		global $DIC;
 		
 		$set = $DIC->database()->query("SELECT is_online, edus_uri FROM rep_robj_xesr_usage ".
-			" WHERE id = ".$DIC->database()->quote($a_id, "integer").
-			" AND parent_obj_id = ".$DIC->database()->quote($a_parent_id, "integer")
+			" WHERE id = ".$DIC->database()->quote($a_id, "integer")
+//			. " AND parent_obj_id = ".$DIC->database()->quote($a_parent_id, "integer")
 			);
 		$rec  = $DIC->database()->fetchAssoc($set);
 		$online = (boolean) $rec["is_online"];
@@ -70,8 +70,8 @@ class ilObjLfEduSharingResourceAccess extends ilObjectPluginAccess
 					'is_online'	=> array('integer', 0)
 				),
 				array(
-					'id' => array('integer', $a_id),
-					'parent_obj_id' => array('integer', $a_parent_id)
+					'id' => array('integer', $a_id)//,
+//					'parent_obj_id' => array('integer', $a_parent_id)
 				)
 			);
 			$online = false;

@@ -46,9 +46,11 @@ class EduSharingUtilityFunctions
      * @param string $url
      * @return string
      */
-    public function getObjectIdFromUrl(string $url): string {
-        $objectId = parse_url($url, PHP_URL_PATH);
-        if ($objectId === false) {
+    public function getObjectIdFromUrl(?string $url): string {
+        if (!empty($url)) {
+            $objectId = parse_url($url, PHP_URL_PATH);
+        }
+        if (empty($url) || $objectId === false) {
             try {
                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure','error_get_object_id_from_url', true);
 //                trigger_error(get_string('error_get_object_id_from_url', 'edusharing'), E_USER_WARNING);
@@ -180,7 +182,16 @@ class EduSharingUtilityFunctions
                 foreach ($udd as $fieldId => $value) {
                     $udf_data[str_replace('f_', '', $fieldId)] = $value;
                 }
-                return $udf_data[(int) $udf->fetchFieldIdFromName('ZOERR_Auth')];
+                if(!isset($udf_data[$udf->fetchFieldIdFromName('ZOERR_Auth')])) {
+                    $DIC->language()->loadLanguageModule('rep_robj_xesr');
+                    $DIC->ui()->mainTemplate()->setOnScreenMessage('failure', $DIC->language()->txt('rep_robj_xesr_error_get_zoerr_auth'), true);
+                    $guestid = $settings->get('edu_guest_guest_id');
+                    if (empty($guestid)) {
+                        $guestid = 'esguest';
+                    }
+                    return $guestid;
+                }
+                return $udf_data[$udf->fetchFieldIdFromName('ZOERR_Auth')];
 
             case 'randomUId':
                 $usr_ident = $this->getUserIdent() . '@' . ilCmiXapiUser::getIliasUuid() . '.ilias';
