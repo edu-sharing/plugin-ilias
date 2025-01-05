@@ -39,5 +39,11 @@ class ilLfEduSharingResourcePlugin extends ilRepositoryObjectPlugin
 	{
 		// TODO: delete database
 	}
+
+	public function allowCopy() : bool
+	{
+		return true;
+	}
+
 }
 ?>

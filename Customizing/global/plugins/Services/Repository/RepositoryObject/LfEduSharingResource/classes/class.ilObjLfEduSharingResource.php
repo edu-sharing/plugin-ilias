@@ -246,7 +246,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		$parent_ref_id = $tree->getParentId($new_obj->getRefId());
 		$course_id = ilObject::_lookupObjId($parent_ref_id);
 		if (empty($new_obj->course)) {
-			$new_obj->course = $course_id;
+			//$new_obj->course = $course_id;
 		}
 		$new_obj->setUri($this->getUri());
 		$new_obj->setObjectVersion($this->getObjectVersion());
