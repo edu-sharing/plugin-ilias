@@ -10,7 +10,8 @@ More information about edu-sharing can be found on the [edu-sharing homepage](ht
 Installation
 ------------
 - Put the directory LfEduSharingResource into your ILIAS Customizing directory at: Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource (create all missing subdirectories)
-- Put the directory LfEduSharingPageComponent into your ILIAS Customizing directory at: Customizing/global/plugins/Services/Repository/COPage/PageComponent/LfEduSharingPageComponent (create all missing subdirectories)
+- Put the directory LfEduSharingPageComponent into your ILIAS Customizing directory at: Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent (create all missing subdirectories)
+- In your ILIAS home directory (usually /var/www/html/) run "composer du"
 - Within ILIAS open Administration > Extending ILIAS > Plugins
 - First install/update and activate the "LfEduSharingResource" plugin
 - After activation click on "Configure" and then on "Connect with home-repository". Further settings see REAME.md of the plugin.
