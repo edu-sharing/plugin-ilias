@@ -1,5 +1,5 @@
 <?php
-include_once("./Services/COPage/classes/class.ilPageComponentPlugin.php");
+//include_once("./Services/COPage/classes/class.ilPageComponentPlugin.php");
 /**
  * LfEduSharing Page Component Plugin
  */

@@ -1,24 +1,2 @@
-/*
-!/Customizing
-/Customizing/*
-!/Customizing/global
-/Customizing/global*
-!/Customizing/global/plugins
-/Customizing/global/plugins/*
-!/Customizing/global/plugins/Services
-/Customizing/global/plugins/Services/*
-!/Customizing/global/plugins/Services/Repository
-/Customizing/global/plugins/Services/Repository/*
-!/Customizing/global/plugins/Services/Repository/RepositoryObject
-/Customizing/global/plugins/Services/Repository/RepositoryObject/*
-!/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource
-
-!/Customizing/global/plugins/Services/COPage
-/Customizing/global/plugins/Services/COPage/*
-!/Customizing/global/plugins/Services/COPage/PageComponent
-/Customizing/global/plugins/Services/COPage/PageComponent/*
-!/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent
-
-!LICENSE
-!README.md
+.idea/
 

@@ -13,7 +13,7 @@ namespace EduSharingApiClient;
 class Usage
 {
     public string      $nodeId;
-    public ?string $nodeVersion;
+    public string|null $nodeVersion;
     public string      $containerId;
     public string      $resourceId;
     public string      $usageId;

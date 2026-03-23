@@ -9,6 +9,7 @@ use EduSharingApiClient\EduSharingHelperBase;
 use EduSharingApiClient\EduSharingNodeHelper;
 use EduSharingApiClient\EduSharingNodeHelperConfig;
 use EduSharingApiClient\NodeDeletedException;
+use EduSharingApiClient\SecuredNode;
 use EduSharingApiClient\UrlHandling;
 use EduSharingApiClient\Usage;
 use EduSharingApiClient\UsageDeletedException;
@@ -118,26 +119,13 @@ class EduSharingService
      * @throws Exception
      */
     public function getTicket(): string {
-        //ToDo remove user
         global $DIC;
-        $USER = $DIC->user();
-//        if (isset($USER->edusharing_userticket)) {
-//            if (isset($USER->edusharing_userticketvalidationts) && time() - $USER->edusharing_userticketvalidationts < 10) {
-//                return $USER->edusharing_userticket;
-//            }
-//            $ticketInfo = $this->authHelper->getTicketAuthenticationInfo($USER->edusharing_userticket);
-//            if ($ticketInfo['statusCode'] === 'OK') {
-//                $USER->edusharing_userticketvalidationts = time();
-//
-//                return $USER->edusharing_userticket;
-//            }
-//        }
         $additionalFields = null;
-        if ($this->utils->getConfigEntry('send_additional_auth') === '1' && $this->utils->getConfigEntry('edu_guest_option') != '1') {
+        if ($this->utils->getConfigEntry('edu_guest_option') != '1') {
             $additionalFields = [
-                'firstName' => $USER->getFirstname(),
-                'lastName'  => $USER->getLastname(),
-                'email'     => $USER->getEmail()
+                'firstName' => $DIC->user()->getFirstname(),
+                'lastName'  => $DIC->user()->getLastname(),
+                'email'     => $DIC->user()->getEmail()
             ];
         }
         return $this->authHelper->getTicketForUser($this->utils->getAuthKey(), $additionalFields);
@@ -399,18 +387,49 @@ class EduSharingService
         return $result->content;
     }
 
-//    /**
-//     * Function requireEduLogin
-//     *
-//     * @throws require_login_exception
-//     * @throws coding_exception
-//     * @throws moodle_exception
-//     * @throws Exception
-//     */
-//    public function requireEduLogin(?int $courseId = null, bool $checkTicket = true, bool $checkSessionKey = true): void {
-//        require_login($courseId);
-//        $checkSessionKey && require_sesskey();
-//        $checkTicket && $this->getTicket();
-//    }
+    /**
+     * @throws JsonException
+     * @throws Exception
+     */
+    public function getRendering2Url(): string {
+        $about = $this->nodeHelper->base->getAbout();
+        if (isset($about['renderingService2']['url'])) {
+            return $about['renderingService2']['url'];
+        }
+        throw new Exception('Rendering Service 2 is not configured');
+    }
 
+    /**
+     * hasRendering2
+     *
+     * @return bool
+     */
+    public function hasRendering2(): bool {
+        try {
+            $this->getRendering2Url();
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @throws JsonException
+     * @throws Exception
+     */
+    public function getSecuredNode(string $nodeId, string $resourceId, string $version): SecuredNode {
+        global $DIC;
+        $securedNode = $this->nodeHelper->getSecuredNode(
+            ticket: $this->getTicket(),
+            nodeId: $nodeId,
+            repoId: $this->utils->getConfigEntry('application_homerepid'),
+            version: $version
+        );
+        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $resourceId;
+        return $securedNode;
+    }
+
+    public function getPreview(Usage $usage): CurlResult {
+        return $this->nodeHelper->getPreview($usage);
+    }
 }

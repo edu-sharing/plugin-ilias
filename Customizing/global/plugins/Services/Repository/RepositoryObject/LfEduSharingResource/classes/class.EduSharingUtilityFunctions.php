@@ -370,10 +370,6 @@ class EduSharingUtilityFunctions
      */
     public function getInternalUrl(): string {
         try {
-//            $internalUrl = $this->appConfig->get('application_docker_network_url');
-//            if (empty($internalUrl)) {
-//                $internalUrl = $this->appConfig->get('application_cc_gui_url');
-//            }
             $settings = new ilSetting("xedus");
             $internalUrl = $settings->get('application_cc_gui_url');
             return rtrim($internalUrl, '/');

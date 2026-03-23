@@ -3,6 +3,7 @@
 namespace EduSharingApiClient;
 
 use Exception;
+use JsonException;
 
 /**
  * Class EduSharingHelperBase
@@ -27,8 +28,8 @@ class EduSharingHelperBase
      * @throws Exception
      */
     public function __construct(string $baseUrl, string $privateKey, string $appId) {
-        if (!preg_match('/^([a-z]|[A-Z]|[0-9]|[-_])+$/', $appId)) {
-            throw new Exception('The given app id contains invalid characters or symbols');
+        if (!preg_match('/^([a-z]|[A-Z]|[0-9]|[-_]|[.])+$/', $appId)) {
+            throw new InvalidAppIdException('The given app id contains invalid characters or symbols');
         }
         $baseUrl           = rtrim($baseUrl, '/');
         $this->baseUrl     = $baseUrl;
@@ -73,10 +74,17 @@ class EduSharingHelperBase
      *
      * @param string $toSign
      * @return string
+     * @throws Exception
      */
     public function sign(string $toSign): string {
         $privateKeyId = openssl_get_privatekey($this->privateKey);
-        openssl_sign($toSign, $signature, $privateKeyId);
+        $success      = false;
+        if ($privateKeyId !== false) {
+            $success = openssl_sign($toSign, $signature, $privateKeyId);
+        }
+        if (!$success || !isset($signature)) {
+            throw new Exception("Private key invalid or empty.");
+        }
         return base64_encode($signature);
     }
 
@@ -88,6 +96,19 @@ class EduSharingHelperBase
      */
     public function verifyCompatibility(): void {
         $minVersion = '8.0';
+        $about = $this->getAbout();
+        if (version_compare($about["version"]["repository"], $minVersion) < 0) {
+            throw new Exception("The Edu-Sharing version of the connected repository is too low");
+        }
+    }
+
+    /**
+     * Function getAbout
+     *
+     * @throws JsonException
+     * @throws Exception
+     */
+    public function getAbout(): array {
         $request    = $this->handleCurlRequest($this->baseUrl . '/rest/_about', [
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json',
@@ -97,12 +118,24 @@ class EduSharingHelperBase
             CURLOPT_RETURNTRANSFER => 1
         ]);
         if ((int)$request->info["http_code"] === 200) {
-            $result = json_decode($request->content, true, 512, JSON_THROW_ON_ERROR);
-            if (version_compare($result["version"]["repository"], $minVersion) < 0) {
-                throw new Exception("The edu-sharing version of the target repository is too low. Minimum required is " . $minVersion . "\n" . print_r(isset($result['version']) ? $result['version'] : $result, true));
-            }
-        } else {
-            throw new Exception("The edu-sharing version could not be retrieved\n" . print_r($request->info, true));
+            return json_decode($request->content, true, 512, JSON_THROW_ON_ERROR);
         }
+        throw new Exception(
+            "The edu-sharing about info could not be retrieved\n" . print_r($request->info, true));
+    }
+
+    /**
+     * get the base url of the rendering service 2
+     * if it is not available, null is returned
+     *
+     * @throws JsonException
+     * @throws Exception
+     */
+    public function getRenderingServiceUrl(): ?string {
+        $about = $this->getAbout();
+        if (isset ($about['renderingService2']['url'])) {
+            return $about['renderingService2']['url'];
+        }
+        return null;
     }
 }

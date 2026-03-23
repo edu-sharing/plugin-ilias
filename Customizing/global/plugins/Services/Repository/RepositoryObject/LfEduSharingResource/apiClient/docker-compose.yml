@@ -1,0 +1,17 @@
+version: "3.0"
+services:
+  apache-example:
+    image: edu-sharing/php-auth-plugin:latest
+    build:
+      context: .
+    # you can create a .env file to overwrite them
+    environment:
+      APP_ID: "${APP_ID:-sample-app}"
+      BASE_URL_INTERNAL: "${BASE_URL_INTERNAL:-http://host.docker.internal:8100/edu-sharing}"
+      BASE_URL_EXTERNAL: "${BASE_URL_EXTERNAL:-http://repository.127.0.0.1.nip.io/edu-sharing}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/var/www/html/example/data
+    ports:
+      - "8080:80"

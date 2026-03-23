@@ -44,7 +44,7 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
      * @throws JsonException
      * @throws Exception
      */
-    public function createUsage(string $ticket, string $containerId, string $resourceId, string $nodeId, string $nodeVersion = null): Usage {
+    public function createUsage(string $ticket, string $containerId, string $resourceId, string $nodeId, ?string $nodeVersion = null): Usage {
         $headers   = $this->getSignatureHeaders($ticket);
         $headers[] = $this->getRESTAuthenticationHeader($ticket);
         $curl      = $this->base->handleCurlRequest($this->base->baseUrl . '/rest/usage/v1/usages/repository/-home-', [
@@ -60,7 +60,14 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_HTTPHEADER     => $headers
         ]);
-        $data      = json_decode($curl->content, true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode($curl->content, true, 512, JSON_THROW_ON_ERROR);
+        if ((int)$curl->info['http_code'] === 403 || (!empty($data['error']) && $data['message'] === 'NO_CCPUBLISH_PERMISSION')) {
+            throw new MissingRightsException("User missing publish rights.");
+        }
+        if (empty($data['parentNodeId']) || empty($data['nodeId'])) {
+            error_log('Creating usage failed for node: ' . $nodeId . '. Returned content: ' . $curl->content);
+            throw new Exception('creating usage failed: ' . $nodeId);
+        }
         if ($curl->error === 0 && $curl->info['http_code'] ?? 0 === 200 && empty($data['error'])) {
             return new Usage($data['parentNodeId'], $nodeVersion, $containerId, $resourceId, $data['nodeId']);
         }
@@ -106,6 +113,135 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
     }
 
     /**
+     * Function getSecuredNode
+     *
+     * retrieves the secured node for rendering via rendering service 2
+     * @param string $ticket
+     * A ticket with the user session who is creating this usage
+     * @param string $nodeId
+     * The node id
+     * @param string $repoId
+     * The repository id
+     * @param string $version
+     * @return SecuredNode
+     * @throws JsonException
+     */
+    function getSecuredNode(string $ticket, string $nodeId, string $repoId, string $version): SecuredNode {
+        $headers   = $this->getSignatureHeaders($ticket);
+        $headers[] = $this->getRESTAuthenticationHeader($ticket);
+        $url = $this->base->baseUrl . '/rest/node/v1/nodes/' . $repoId . '/' . $nodeId . '/metadata/secured?propertyFilter=-all-';
+        if ($version !== '' && $version !== '0' && $version !== '-1') {
+            $url .= '&version=' . rawurlencode($version);
+        }
+        $curl = $this->base->handleCurlRequest($url, [
+            CURLOPT_FAILONERROR    => false,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HTTPHEADER     => $headers
+        ]);
+        $data = json_decode($curl->content, true, 512, JSON_THROW_ON_ERROR);
+        if ($curl->error === 0 && $curl->info['http_code'] ?? 0 === 200
+            && isset($data['node']) && isset($data['jwt']) && isset($data['signedNode']) && isset($data['signature'])) {
+            return new SecuredNode(
+                node: $data['node'],
+                securedNode: $data['signedNode'],
+                jwt: $data['jwt'],
+                signature: $data['signature'],
+                previewUrl: ''
+            );
+        }
+        throw new Exception('fetching secured node failed '
+            . ($curl->info['http_code'] ?? 'unknown') . ': ' . ($data['error'] ?? 'unknown') . ' ' . ($data['message'] ?? 'unknown'));
+    }
+
+    /**
+     * Function getSecuredNode
+     *
+     * retrieves the secured node for rendering via rendering service 2
+     * If version is specified in usage, the secured node will be fetched for the specified version
+     * The latest version will be fetched if version is either null, an empty string, "0" or "-1"
+     *
+     * @param Usage $usage
+     * @return SecuredNode
+     * @throws JsonException
+     * @throws Exception
+     */
+    function getSecuredNodeByUsage(Usage $usage): SecuredNode {
+        $headers   = $this->getUsageSignatureHeaders($usage);
+        $url = $this->base->baseUrl . '/rest/node/v1/nodes/-home-/' . $usage->nodeId . '/metadata/secured';
+        if ($usage->nodeVersion !== null && $usage->nodeVersion !== '' && $usage->nodeVersion !== '0' && $usage->nodeVersion !== '-1') {
+            $url .= '?version=' . rawurlencode($usage->nodeVersion);
+        }
+        $curl = $this->base->handleCurlRequest($url, [
+            CURLOPT_FAILONERROR    => false,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HTTPHEADER     => $headers
+        ]);
+        $data = json_decode($curl->content, true, 512, JSON_THROW_ON_ERROR);
+
+        if ($curl->error === 0 && ($curl->info['http_code'] ?? 0) === 200
+            && isset($data['node']) && isset($data['jwt']) && isset($data['signedNode']) && isset($data['signature'])) {
+            return new SecuredNode(
+                node: $data['node'],
+                securedNode: $data['signedNode'],
+                jwt: $data['jwt'],
+                signature: $data['signature']
+            );
+        }
+        throw new Exception('fetching secured node failed '
+            . ($curl->info['http_code'] ?? 'unknown') . ': ' . ($data['error'] ?? 'unknown') . ' ' . ($data['message'] ?? 'unknown'));
+    }
+
+    /**
+     * Function getNodeByUsageRendering2
+     *
+     * returns node without detailsSnippet (which is not available when legacy rendering is deactivated)
+     * If version is specified in usage, thesecured node will be fetched for the specified version
+     * The latest version will be fetched if version is either null, an empty string, "0" or "-1"
+     *
+     * @param Usage $usage
+     * @return CurlResult
+     */
+    private function getNodeByUsageRendering2(Usage $usage): CurlResult {
+        $headers   = $this->getUsageSignatureHeaders($usage);
+        $url = $this->base->baseUrl . '/rest/node/v1/nodes/-home-/' . $usage->nodeId . '/metadata';
+        if ($usage->nodeVersion !== null && $usage->nodeVersion !== '' && $usage->nodeVersion !== '0' && $usage->nodeVersion !== '-1') {
+            $url .= '?version=' . rawurlencode($usage->nodeVersion);
+        }
+        return $this->base->handleCurlRequest($url, [
+            CURLOPT_FAILONERROR    => false,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HTTPHEADER     => $headers
+        ]);
+    }
+
+    /**
+     * Function getNodeByUsageLegacy
+     *
+     * calls rendering API and returns node including detailsSnippet
+     *
+     * @param Usage $usage
+     * @param string $displayMode
+     * @param array|null $renderingParams
+     * @param string|null $userId
+     * @return CurlResult
+     */
+    private function getNodeByUsageLegacy(Usage $usage, string $displayMode = DisplayMode::INLINE, ?array $renderingParams = null, ?string $userId = null): CurlResult {
+        $url = $this->base->baseUrl . '/rest/rendering/v1/details/-home-/' . rawurlencode($usage->nodeId);
+        $url .= '?displayMode=' . rawurlencode($displayMode);
+        if ($usage->nodeVersion) {
+            $url .= '&version=' . rawurlencode($usage->nodeVersion);
+        }
+        $headers = $this->getUsageSignatureHeaders($usage, $userId);
+        return $this->base->handleCurlRequest($url, [
+            CURLOPT_FAILONERROR    => false,
+            CURLOPT_POST           => 1,
+            CURLOPT_POSTFIELDS     => json_encode($renderingParams),
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HTTPHEADER     => $headers
+        ]);
+    }
+
+    /**
      * Function getNodeByUsage
      *
      * Loads the edu-sharing node referred by a given usage
@@ -115,30 +251,25 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
      * The displayMode
      * This will ONLY change the content representation inside the "detailsSnippet" return value
      * @param array|null $renderingParams
+     * @param string|null $userId
+     * The userId can be included for tracking and statistics purposes
+     * @param bool $rendering2
      * @return array
      * Returns an object containing a "detailsSnippet" representation
      * as well as the full node as provided by the REST API
      * Please refer to the edu-sharing REST documentation for more details
+     * @throws JsonException
      * @throws NodeDeletedException
      * @throws UsageDeletedException
-     * @throws JsonException
      * @throws Exception
      */
-    public function getNodeByUsage(Usage $usage, string $displayMode = DisplayMode::INLINE, array $renderingParams = null): array {
-        $url = $this->base->baseUrl . '/rest/rendering/v1/details/-home-/' . rawurlencode($usage->nodeId);
-        $url .= '?displayMode=' . rawurlencode($displayMode);
-        if ($usage->nodeVersion !== null) {
-            $url .= '&version=' . rawurlencode($usage->nodeVersion);
+    public function getNodeByUsage(Usage $usage, string $displayMode = DisplayMode::INLINE, ?array $renderingParams = null, ?string $userId = null, bool $rendering2 = false): array {
+        if ($rendering2) {
+            $curl = $this->getNodeByUsageRendering2($usage);
+        } else {
+            $curl = $this->getNodeByUsageLegacy($usage, $displayMode, $renderingParams, $userId);
         }
-        $headers = $this->getUsageSignatureHeaders($usage);
-        $curl    = $this->base->handleCurlRequest($url, [
-            CURLOPT_FAILONERROR    => false,
-            CURLOPT_POST           => 1,
-            CURLOPT_POSTFIELDS     => json_encode($renderingParams),
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_HTTPHEADER     => $headers
-        ]);
-        $data    = json_decode($curl->content, true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode($curl->content, true, 512, JSON_THROW_ON_ERROR);
         $this->handleURLMapping($data, $usage);
         if ($curl->error === 0 && (int)($curl->info['http_code'] ?? 0) === 200) {
             return $data;
@@ -196,7 +327,7 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
         }
         if (isset($data['node'])) {
             $params = '&usageId=' . urlencode($usage->usageId) . '&nodeId=' . urlencode($usage->nodeId) . '&resourceId=' . urlencode($usage->resourceId) . '&containerId=' . urlencode($usage->containerId);
-            if ($usage->nodeVersion !== null) {
+            if ($usage->nodeVersion) {
                 $params .= '&nodeVersion=' . urlencode($usage->nodeVersion);
             }
             $endpointBase           = $this->config->urlHandling->endpointURL . (str_contains($this->config->urlHandling->endpointURL, '?') ? '&' : '?');
@@ -205,7 +336,10 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
                 'content'  => $contentUrl,
                 'download' => $endpointBase . 'mode=download' . $params
             ];
-            $data['detailsSnippet'] = str_replace('{{{LMS_INLINE_HELPER_SCRIPT}}}', $contentUrl, $data['detailsSnippet']);
+            if (isset($data['detailsSnippet'])) {
+                $data['detailsSnippet'] = str_replace('{{{LMS_INLINE_HELPER_SCRIPT}}}', $contentUrl, $data['detailsSnippet']);
+                $data['detailsSnippet'] = str_replace('{{{TICKET}}}', '', $data['detailsSnippet']);
+            }
         }
     }
 
@@ -214,15 +348,22 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
      *
      * @param string $mode
      * @param Usage $usage
+     * @param array $additionalParams
+     * Additional query params that shall be passed to the repository url (as key=>value structure)
+     * @param string|null $userId
+     * The user id. Note: Due to the current behaviour, this userId will currently NOT obeyed for the tracking results
+     * of this method, the statistics/tracking when going into the full view will always be anonymous
+     * @param bool $rendering2
      * @return string
      * @throws JsonException
      * @throws NodeDeletedException
      * @throws UsageDeletedException
      * @throws Exception
      */
-    public function getRedirectUrl(string $mode, Usage $usage): string {
+    public function getRedirectUrl(string $mode, Usage $usage, array $additionalParams = [], ?string $userId = null, bool $rendering2 = false): string {
         $headers = $this->getUsageSignatureHeaders($usage);
-        $node    = $this->getNodeByUsage($usage);
+        // DisplayMode::PRERENDER is used in order to differentiate for tracking and statistics
+        $node = $this->getNodeByUsage($usage, DisplayMode::PRERENDER, null, $userId, $rendering2);
         $params  = '';
         foreach ($headers as $header) {
             if (!str_starts_with($header, 'X-')) {
@@ -230,6 +371,14 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
             }
             $header = explode(': ', $header);
             $params .= '&' . $header[0] . '=' . urlencode($header[1]);
+        }
+        foreach($additionalParams as $key => $value) {
+            foreach ($headers as $header) {
+                if($header[0] === $key) {
+                    continue(2);
+                }
+            }
+            $params .= '&' . $key . '=' . urlencode($value);
         }
         if ($mode === 'content') {
             $url    = $node['node']['content']['url'] ?? '';
@@ -246,13 +395,71 @@ class EduSharingNodeHelper extends EduSharingHelperAbstract
      * Function getUsageSignatureHeaders
      *
      * @param Usage $usage
+     * @param string|null $userId
      * @return array
      */
-    private function getUsageSignatureHeaders(Usage $usage): array {
+    private function getUsageSignatureHeaders(Usage $usage, ?string $userId = null): array {
         $headers   = $this->getSignatureHeaders($usage->usageId);
         $headers[] = 'X-Edu-Usage-Node-Id: ' . $usage->nodeId;
         $headers[] = 'X-Edu-Usage-Course-Id: ' . $usage->containerId;
         $headers[] = 'X-Edu-Usage-Resource-Id: ' . $usage->resourceId;
+        if ($userId !== null) {
+            $headers[] = 'X-Edu-User-Id: ' . $userId;
+        }
         return $headers;
+    }
+
+    private function getPreviewBaseUrl(Usage $usage, PreviewSize $size = PreviewSize::SIZE_400_PX) {
+        $sizeParam = '';
+        if($size->value > 0) {
+            $sizeParam = "&maxWidth=$size->value&maxHeight=$size->value&crop=true";
+        }
+        $url = $this->base->baseUrl . '/preview?nodeId=' . rawurlencode($usage->nodeId) . $sizeParam;
+        if ($usage->nodeVersion) {
+            $url .= '&version=' . rawurlencode($usage->nodeVersion);
+        }
+        return $url;
+    }
+
+    /**
+     * Function getPreview
+     *
+     * gets the preview (inlucding potential secured headers) and returns it in $result->content as a binary object
+     *
+     * @param Usage $usage
+     * @param PreviewSize $size
+     * @return CurlResult
+     */
+    public function getPreview(Usage $usage, PreviewSize $size = PreviewSize::SIZE_400_PX): CurlResult {
+        $url = $this->getPreviewBaseUrl($usage, $size);
+        $headers = $this->getUsageSignatureHeaders($usage);
+        return $this->base->handleCurlRequest($url, [
+            CURLOPT_FAILONERROR    => false,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HTTPHEADER     => $headers
+        ]);
+    }
+    /**
+     * Function getPreview
+     *
+     * Same as getPreview, but will return a ready-to-send url to the client including the signed preview url
+     * Use this method if you don't want to proxy the preview through your system
+     *
+     * @param Usage $usage
+     * @param PreviewSize $size
+     * @return String
+     */
+    public function getPreviewUrl(Usage $usage, PreviewSize $size = PreviewSize::SIZE_400_PX): String {
+        $url = $this->getPreviewBaseUrl($usage, $size);
+        $headers = $this->getUsageSignatureHeaders($usage);
+        $params = '';
+         foreach ($headers as $header) {
+            if (!str_starts_with($header, 'X-')) {
+                continue;
+            }
+            $header = explode(': ', $header);
+            $params .= '&' . $header[0] . '=' . urlencode($header[1]);
+        }
+        return $url . $params;
     }
 }

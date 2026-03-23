@@ -4,22 +4,28 @@
  * GPLv2, see LICENSE 
  */
 
+//use ILIAS\ilContext;
+
+$ilias_root = dirname(__DIR__, 8);
+require_once $ilias_root . "/vendor/composer/vendor/autoload.php";
+
 /**
  * edusharing plugin: 
  *
  * @author Uwe Kohnle <kohnle@internetlehrer-gmbh.de>
  * @version $Id$
  */ 
-chdir("../../../../../../../");
 
 // Avoid redirection to start screen
 // (see ilInitialisation::InitILIAS for details)
 //$_GET["baseClass"] = "ilStartUpGUI";
 //require_once "./include/inc.header.php";
-include_once "Services/Context/classes/class.ilContext.php";
+//error_log($_SERVER['DOCUMENT_ROOT']);
+//error_log(ILIAS_WEB_DIR);
+include_once $ilias_root . "/components/ILIAS/Context/classes/class.ilContext.php";
 ilContext::init(ilContext::CONTEXT_SCORM);
 
-require_once("Services/Init/classes/class.ilInitialisation.php");
+require_once($ilias_root . "/components/ILIAS/Init/classes/class.ilInitialisation.php");
 ilInitialisation::initILIAS();
 
 

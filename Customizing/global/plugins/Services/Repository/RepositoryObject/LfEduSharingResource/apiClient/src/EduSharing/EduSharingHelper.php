@@ -22,7 +22,7 @@ class EduSharingHelper
      */
     public static function generateKeyPair(): array {
         $res = openssl_pkey_new();
-        //PHP8 !$res && throw new Exception('No result from openssl_pkey_new. Please check your php installation');
+        !$res && throw new Exception('No result from openssl_pkey_new. Please check your php installation');
         openssl_pkey_export($res, $privateKey);
         $publicKeyData = openssl_pkey_get_details($res);
         $publicKey     = $publicKeyData['key'];

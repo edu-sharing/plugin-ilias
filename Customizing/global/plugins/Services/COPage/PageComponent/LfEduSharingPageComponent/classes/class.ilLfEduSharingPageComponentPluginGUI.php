@@ -17,6 +17,10 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 
 	protected \ilPageComponentPlugin $plugin;
 
+    private EduSharingService $service;
+
+    private EduSharingUtilityFunctions $utils;
+
 
 	public function __construct() {
 		global $DIC;
@@ -24,6 +28,8 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 		$this->lng = $DIC->language();
 		$this->ctrl = $DIC->ctrl();
 		$this->tpl = $DIC['tpl'];
+        $this->service = new EduSharingService();
+        $this->utils = new EduSharingUtilityFunctions();
 	}
 
 
@@ -34,8 +40,8 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 			default:
 				$cmd = $this->ctrl->getCmd();
 				if (in_array($cmd, array("create", "edit", "update", "cancel"))) {
-					$this->$cmd();
-				}
+                    $this->$cmd();
+                }
 				break;
 		}
 	}
@@ -57,7 +63,6 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
         $search_btn->setUrl($reposearch);
         $ilToolbar->addButtonInstance($search_btn);
 	}
-
 
 	/**
 	 * Save new element
@@ -270,10 +275,41 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	 */
 	public function getElementHTML(string $a_mode, array $a_properties, string $plugin_version): string
 	{
+        global $DIC;
+        $counter = $this->plugin->getCounter($a_properties['resId']);
+        $this->plugin->setResId($a_properties['resId']);
+        $this->plugin->setVars($a_properties['resId']);
+        if ($this->service->hasRendering2()) {
+            $scripts = '';
+            $styles = '';
+            $repoUrl = $this->utils->getInternalUrl();
+            if ($counter == 0) {
+                // Inject JS and css only once
+                $inlineEnv = "window.__env = {EDU_SHARING_API_URL: `${repoUrl}/rest`};";
+                $inlineScript = '<script type="text/javascript">' . $inlineEnv . '</script>';
+                $webComponentUrl = $repoUrl . '/web-components/rendering-service/main.js';
+                $scripts .= $inlineScript . '<script type="module" src="' . $webComponentUrl . '"></script>';
+                $eduJs = '<script type="text/javascript" src="./Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/js/edu.js"></script>';
+                $scripts .= $eduJs;
+                $webComponentCss = $repoUrl . '/web-components/rendering-service/styles.css';
+                $styles .= '<link rel="stylesheet" href="' . $webComponentCss . '">';
+            }
+            $resourceId = $this->plugin->getResId();
+            $nodeId = $this->utils->getObjectIdFromUrl($this->plugin->getUri());
+            $version = $this->plugin->getObjectVersion();
+            $refId = $DIC->http()->wrapper()->query()->retrieve('ref_id', $DIC->refinery()->kindlyTo()->string());
+            $redirectUrl = ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resourceId . '&ref_id=' . $refId;
+            $nodeEndpoint = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/securedNode.php';
+            $serviceWorker = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/serviceWorker.php';
+            $float = $this->plugin->getWindowFloat() != 'no' ? 'style="float:'.$this->plugin->getWindowFloat().'"' : "";
+            $container = <<<HTML
+            <div data-refid="{$refId}" data-redirecturl="{$redirectUrl}" data-endpoint="{$nodeEndpoint}" data-service-worker="{$serviceWorker}" data-resourceId="{$resourceId}" data-repo="{$repoUrl}" data-nodeId="{$nodeId}" data-version="{$version}" {$float} data-type="esObject">TEST CONTAINER</div>
+            HTML;
+            return $scripts . $styles . $container;
+        }
 		$this->plugin->setResId($a_properties['resId']);
 		$this->plugin->setVars($a_properties['resId']);
 		if ($this->plugin->getUri() == "") return $this->plugin->txt("failure_create");
-		$counter = $this->plugin->getCounter($a_properties['resId']);
 		$html = "";
 
 		$settings = new ilSetting("xedus");
@@ -307,11 +343,10 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 		$html .= '>'.$this->filter_edusharing_get_render_html($redirectUrl).'</div>';
 		$html = $this->filter_edusharing_display($html);
 
-		if ($counter == 0) $html .= '<script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script><script type="text/javascript" src="./Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/js/edu.js"></script>';
+		if ($counter == 0) $html .= '<script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script><script type="text/javascript" src="./Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/js/eduLegacy.js"></script>';
 
 		return $html;
 	}
-
 
     // /**
 	 // *
