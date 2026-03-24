@@ -19,4 +19,7 @@ no_float#:#Standard
 float_left#:#Left, wrapped by text
 float_right#:#Right, wrapped by text
 not_visible_now#:#The resource cannot be displayed temporarily. 
-failure_create#:#The integration of the resource was not successful. Please delete this content. 
+failure_create#:#The integration of the resource was not successful. Please delete this content.
+insert_widget#:#Insert Widget
+widget_info#:#Use this text area to insert an edu-sharing-widget (if your repository supports it).
+widget_no_edit#:#Edu-sharing widgets cannot be edited.

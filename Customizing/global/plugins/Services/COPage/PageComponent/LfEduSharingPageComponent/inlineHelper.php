@@ -11,14 +11,13 @@
  * @version $Id$
  */
 use EduSharingApiClient\EduSharingHelperBase;
-chdir("../../../../../../../");
 
-// Avoid redirection to start screen
-// (see ilInitialisation::InitILIAS for details)
-//$_GET["baseClass"] = "ilStartUpGUI";
-
-require_once "./include/inc.header.php";
+$ilias_root = dirname(__DIR__, 8);
+require_once $ilias_root . "/vendor/composer/vendor/autoload.php";
+require_once $ilias_root . '/components/ILIAS/Init/classes/class.ilInitialisation.php';
+ilInitialisation::initILIAS();
 global $DIC;
+
 $plugin = new ilLfEduSharingPageComponentPlugin($DIC->database(), $DIC["component.repository"], "xesp");
 
 $settings = new ilSetting("xedus");
@@ -48,4 +47,3 @@ $redirectUrl .= '&ticket=' . urlencode(base64_encode($utils->encryptWithRepoKey(
 
 ilUtil::redirect($redirectUrl);
 exit;
-?>

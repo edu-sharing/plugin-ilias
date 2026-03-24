@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const resourceId = element.getAttribute("data-resourceid");
         const repoUrl = element.getAttribute("data-repo");
-        console.log(repoUrl);
         const nodeId = element.getAttribute("data-nodeid");
         const version = element.getAttribute("data-version");
         const nodeEndpoint = element.getAttribute("data-endpoint");

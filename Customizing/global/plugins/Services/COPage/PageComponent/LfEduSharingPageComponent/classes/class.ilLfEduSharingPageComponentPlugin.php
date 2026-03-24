@@ -19,6 +19,7 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
     protected int $window_height_org = 100;
     public int $window_width = 200;
     public int $window_height = 100;
+    public string $widget = '';
 
 //	/**
 //	 * @var ilLfEduSharingPageComponentPlugin
@@ -89,7 +90,6 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
         global $DIC;
         return ilObject::_lookupObjectId($DIC->http()->wrapper()->query()->retrieve('ref_id',
             $DIC->refinery()->kindlyTo()->int()));
-//        return ilObject::_lookupObjectId($_GET['ref_id']);
     }
 
     /**
@@ -204,6 +204,16 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
         return $this->window_height;
     }
 
+    public function setWidget(string $a_val) : void
+    {
+        $this->widget = $a_val;
+    }
+
+    public function getWidget() : string
+    {
+        return $this->widget;
+    }
+
     /**
      * Save new additional data
      * @return integer ILIAS-id of Resource
@@ -231,23 +241,24 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
         global $DIC;
         $db = $DIC->database();
 
-        $db->update('rep_robj_xesp_usage',
-            array(
-                'edus_uri' => array('text', $this->getUri()),
-                'mimetype' => array('text', $this->getMimetype()),
-                'object_version' => array('text', $this->getObjectVersion()),
-                'object_version_use_exact' => array('integer', $this->getObjectVersionUseExact()),
-                'window_float' => array('text', $this->getWindowFloat()),
-                'window_width_org' => array('integer', $this->getWindowWidthOrg()),
-                'window_height_org' => array('integer', $this->getWindowHeightOrg()),
-                'window_width' => array('integer', $this->getWindowWidth()),
-                'window_height' => array('integer', $this->getWindowHeight()),
-                'timemodified' => array('timestamp', date('Y-m-d H:i:s'))
-            ),
-            array(
-                'id' => array('integer', $id)
-            )
-        );
+        $data = [
+            'edus_uri' => ['text', $this->getUri()],
+            'mimetype' => ['text', $this->getMimetype()],
+            'object_version' => ['text', $this->getObjectVersion()],
+            'object_version_use_exact' => ['integer', $this->getObjectVersionUseExact()],
+            'window_float' => ['text', $this->getWindowFloat()],
+            'window_width_org' => ['integer', $this->getWindowWidthOrg()],
+            'window_height_org' => ['integer', $this->getWindowHeightOrg()],
+            'window_width' => ['integer', $this->getWindowWidth()],
+            'window_height' => ['integer', $this->getWindowHeight()],
+            'timemodified' => ['timestamp', date('Y-m-d H:i:s')],
+        ];
+
+        if ($this->getWidget() !== null) {
+            $data['widget'] = ['text', $this->getWidget()];
+        }
+
+        $db->update('rep_robj_xesp_usage', $data, ['id' => ['integer', $id]]);
         return true;
     }
 
@@ -270,6 +281,7 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
                 $this->setWindowHeightOrg((int) $row['window_height_org']);
                 $this->setWindowWidth((int) $row['window_width']);
                 $this->setWindowHeight((int) $row['window_height']);
+                $this->setWidget((string) $row['widget']);
                 $org_obj = (int) $row['obj_id'];
                 // $this->set($row['timecreated']);
                 // $this->set($row['timemodified']);

@@ -1,7 +1,5 @@
 <?php
 
-error_log("preview.php");
-
 use EduSharingApiClient\Usage;
 
 $ilias_root = dirname(__DIR__, 8);
@@ -22,8 +20,6 @@ $refId = $DIC->http()->wrapper()->query()->retrieve(
 
 $parentRefId = $tree->getParentId($refId);
 $upperCourse = ilObject::_lookupObjId($parentRefId);
-
-error_log("upperCourse: " . $upperCourse);
 
 $resourceId = (int) $DIC->http()->wrapper()->query()->retrieve(
     'resourceId',

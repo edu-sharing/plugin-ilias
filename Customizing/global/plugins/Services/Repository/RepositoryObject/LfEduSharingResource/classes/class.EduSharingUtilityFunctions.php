@@ -11,31 +11,11 @@ class EduSharingUtilityFunctions
 {
 
     protected ILIAS\DI\Container $dic;
-//    private ?AppConfig $appConfig;
 
-//    /**
-//     * EduSharingUtilityFunctions constructor
-//     *
-//     * @param AppConfig|null $config
-//     */
-//    public function __construct(?AppConfig $config = null) {
-//        $this->appConfig = $config;
-//        $this->init();
-//    }
     public function __construct() {
         global $DIC;
         $this->dic = $DIC;
     }
-    /**
-     * Function init
-     *
-     * @return void
-     */
-//    private function init(): void {
-//        if ($this->appConfig === null) {
-//            //ToDo: $this->appConfig = new DefaultAppConfig();
-//        }
-//    }
 
     /**
      * Function getObjectIdFromUrl
@@ -94,23 +74,11 @@ class EduSharingUtilityFunctions
         $url .= '/renderingproxy';
         $url .= '?app_id=' . urlencode($this->getConfigEntry('application_appid'));
         $url .= '&session=' . urlencode(session_id());
-//        try {
-            $repoId = $this->getRepositoryIdFromUrl($eduSharing->getUri()); //object_url
-//        } catch (Exception $exception) {
-//            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $exception->getMessage(), true);
-////            error_log($exception->getMessage());
-//            return '';
-//        }
+        $repoId = $this->getRepositoryIdFromUrl($eduSharing->getUri()); //object_url
         $url     .= '&rep_id=' . urlencode($repoId);
         $url     .= '&obj_id=' . urlencode($this->getObjectIdFromUrl($eduSharing->getUri()));//object_url
-//        $url     .= '&resource_id=' . urlencode($eduSharing->id);
         $url     .= '&resource_id=' . urlencode($eduSharing->getId());
         $url     .= '&course_id=' . urlencode($eduSharing->getUpperCourse());//course
-//        $context = context_course::instance($eduSharing->course);
-//        $roles   = get_user_roles($context, $USER->id);
-//        foreach ($roles as $role) {
-//            $url .= '&role=' . urlencode($role->shortname);
-//        }
         $role = 'member';
         if ($DIC->rbac()->system()->checkAccess("write",$eduSharing->getRefId())) {
             $role = 'editingteacher';
@@ -121,8 +89,6 @@ class EduSharingUtilityFunctions
         $url .= '&locale=' . urlencode($DIC->user()->getLanguage()); //repository
         $url .= '&language=' . urlencode($DIC->user()->getLanguage()); //rendering service
         $url .= '&u=' . rawurlencode(base64_encode($this->encryptWithRepoKey($this->getAuthKey())));
-//        die($url);
-        //die($this->encryptWithRepoKey($this->getAuthKey()));
 
         return $url;
     }
@@ -134,15 +100,6 @@ class EduSharingUtilityFunctions
     public function getAuthKey(): string {
         global $DIC;
     	$settings = new ilSetting("xedus");
-
-        // Set by external sso script.
-//        if (!empty($SESSION->edusharing_sso)) {
-//            return $SESSION->edusharing_sso[$this->getConfigEntry('EDU_AUTH_PARAM_NAME_USERID')];
-//        }
-//        if ($settings->get('EDU_AUTH_PARAM_NAME_USERID') != 'no' && array_key_exists('sso', $_SESSION) && !empty($_SESSION['sso'])) {
-//            $eduauthparamnameuserid = $settings->get('EDU_AUTH_PARAM_NAME_USERID');
-//            return $_SESSION['sso'][$eduauthparamnameuserid];
-//        }
 
         $guestoption = $settings->get('edu_guest_option');
         if (!empty($guestoption) || $DIC->user()->getId() == 13) { //13=anonymous
@@ -158,15 +115,12 @@ class EduSharingUtilityFunctions
         switch($eduauthkey) {
             case 'id':
                 return $DIC->user()->getLogin();
-                break;
 
             case 'idnumber':
                 return $DIC->user()->getId();
-                break;
 
             case 'email':
                 return $DIC->user()->getEmail();
-                break;
 
             case 'username':
                 return $DIC->user()->getFirstname() . " " . $DIC->user()->getLastname();//$DIC->user()->getFullname();
@@ -275,7 +229,6 @@ class EduSharingUtilityFunctions
         openssl_public_encrypt($data, $encrypted, $key);
         if (!openssl_public_encrypt($data, $encrypted, $key)) {
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'error_encrypt_with_repo_public',true);
-//            trigger_error(get_string('error_encrypt_with_repo_public', 'edusharing'), E_USER_WARNING);
             return '';
         }
         return $encrypted;
@@ -304,49 +257,6 @@ class EduSharingUtilityFunctions
             }
         }
     }
-
-
-//    /**
-//     * Function getCourseModuleInfo
-//     *
-//     * @param stdClass $courseModule
-//     * @return cached_cm_info|bool
-//     */
-//    public function getCourseModuleInfo(stdClass $courseModule) {
-//        global $DB;
-//        try {
-//            $edusharing = $DB->get_record('edusharing', ['id' => $courseModule->instance], 'id, name, intro, introformat', MUST_EXIST);
-//        } catch (Exception $exception) {
-//            error_log($exception->getMessage());
-//            return false;
-//        }
-//        $info = new cached_cm_info();
-//        if ($courseModule->showdescription) {
-//            // Convert intro to html. Do not filter cached version, filters run at display time.
-//            $info->content = format_module_intro('edusharing', $edusharing, $courseModule->id, false);
-//        }
-//        try {
-//            $resource = $DB->get_record('edusharing', ['id' => $courseModule->instance], '*', MUST_EXIST);
-//            if (!empty($resource->popup_window)) {
-//                $info->onclick = 'this.target=\'_blank\';';
-//            }
-//        } catch (Exception $exception) {
-//            error_log($exception->getMessage());
-//        }
-//        return $info;
-//    }
-
-//    /**
-//     * Function getInlineObjectMatches
-//     *
-//     * @param string $inputText
-//     * @return array
-//     */
-//    public function getInlineObjectMatches(string $inputText): array {
-//        preg_match_all('#<img(.*)class="(.*)edusharing_atto(.*)"(.*)>#Umsi', $inputText, $matchesImg, PREG_PATTERN_ORDER);
-//        preg_match_all('#<a(.*)class="(.*)edusharing_atto(.*)">(.*)</a>#Umsi', $inputText, $matchesA, PREG_PATTERN_ORDER);
-//        return array_merge($matchesImg[0], $matchesA[0]);
-//    }
 
     /**
      * Function getConfigEntry

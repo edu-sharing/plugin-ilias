@@ -1,7 +1,5 @@
 <?php
 
-//namespace mod_edusharing;
-
 use EduSharingApiClient\CurlResult;
 use EduSharingApiClient\CurlHandler as EdusharingCurlHandler;
 use EduSharingApiClient\EduSharingAuthHelper;
@@ -13,9 +11,6 @@ use EduSharingApiClient\SecuredNode;
 use EduSharingApiClient\UrlHandling;
 use EduSharingApiClient\Usage;
 use EduSharingApiClient\UsageDeletedException;
-//use Exception;
-//use JsonException;
-//use stdClass;
 
 class EduSharingService
 {
@@ -39,15 +34,12 @@ class EduSharingService
         $this->authHelper = $authHelper;
         $this->nodeHelper = $nodeHelper;
         $this->utils      = $utils;
-//        global $CFG;
-//        require_once($CFG->dirroot . '/mod/edusharing/eduSharingAutoloader.php');
         $this->init();
     }
 
     /**
      * Function init
      *
-//     * @throws dml_exception
      * @throws Exception
      */
     private function init(): void {
@@ -55,7 +47,6 @@ class EduSharingService
         if ($this->authHelper === null || $this->nodeHelper === null) {
             $internalUrl = $this->utils->getInternalUrl();
             $baseHelper  = new EduSharingHelperBase($internalUrl, $this->utils->getConfigEntry('application_private_key'), $this->utils->getConfigEntry('application_appid'));
-            //$baseHelper->registerCurlHandler(new EduSharingApiClient\DefaultCurlHandler());
             $baseHelper->registerCurlHandler(new ilLfEduSharingCurlHandler());
             $this->authHelper === null && $this->authHelper = new EduSharingAuthHelper($baseHelper);
             if ($this->nodeHelper === null) {
@@ -153,99 +144,27 @@ class EduSharingService
     /**
      * Function addInstance
      */
-    public function addInstance(ilObjLfEduSharingResource $eduSharing, ?int $updateTime = null): bool
+    public function addInstance(ilObjLfEduSharingResource $eduSharing): bool
     {
         global $DIC;
 
-//        $eduSharing->timecreated  = $updateTime ?? time();//deprecated
-//        $eduSharing->timemodified = $updateTime ?? time();//deprecated
-
-        // You may have to add extra stuff in here.
-        $this->postProcessEdusharingObject($eduSharing, $updateTime);
+        $this->postProcessEdusharingObject($eduSharing);
 
         if ($DIC->http()->wrapper()->post()->has('object_version')
             && $DIC->http()->wrapper()->post()->retrieve('object_version', $DIC->refinery()->kindlyTo()->string()) != '0') {
             $eduSharing->object_version = $DIC->http()->wrapper()->post()->retrieve('object_version', $DIC->refinery()->kindlyTo()->string());
         }
-        //use simple version handling for atto plugin or legacy code
-//        if (isset($eduSharing->editor_atto)) {
-//            //avoid database error
-//            $eduSharing->introformat = 0;
-//        } else if (isset($eduSharing->window_versionshow) && $eduSharing->window_versionshow == 'current') {
-//            $eduSharing->object_version = $eduSharing->window_version;
-//        }
-//        try {
-//            $id = $DB->insert_record('edusharing', $eduSharing);
-//        } catch (Exception $exception) {
-//            error_log($exception->getMessage());
-//            return false;
-//        }
-
 
         $usageData              = new stdClass();
         $usageData->containerId = $eduSharing->getUpperCourse();
         $usageData->resourceId  = $eduSharing->getId();//$id;
         $usageData->nodeId      = $this->utils->getObjectIdFromUrl($eduSharing->getUri()); //$eduSharing->object_url
         $usageData->nodeVersion = $eduSharing->object_version;
-//        try {
-            $usage                = $this->createUsage($usageData);
-//            $eduSharing->id       = $eduSharing->getId();//$id;
-            $id = $eduSharing->getId();//$id;
-//            $eduSharing->usage_id = $usage->usageId;//deprecated
-//            $DB->update_record('edusharing', $eduSharing);
-            return true;
-//        } catch (Exception $exception) {
-//            !empty($exception->getMessage()) && error_log($exception->getMessage());
-//            try {
-//                $DB->delete_records('edusharing', ['id' => $eduSharing->getId()]);//$id]);
-//            } catch (Exception $deleteException) {
-//                error_log($deleteException->getMessage());
-//            }
-//            return false;
-//        }
-    }
+        $this->createUsage($usageData);
+        $eduSharing->getId();//$id;
 
-//    /**
-//     * Function updateInstance
-//     *
-//     * @param stdClass $edusharing
-//     * @param int|null $updateTime
-//     * @return bool
-//     */
-//    public function updateInstance(stdClass $edusharing, ?int $updateTime = null): bool {
-//        global $DB;
-//        // FIX: when editing a moodle-course-module the $edusharing->id will be named $edusharing->instance
-//        if (!empty($edusharing->instance)) {
-//            $edusharing->id = $edusharing->instance;
-//        }
-//        $this->postProcessEdusharingObject($edusharing, $updateTime);
-//        $usageData              = new stdClass();
-//        $usageData->containerId = $edusharing->course;
-//        $usageData->resourceId  = $edusharing->id;
-//        $usageData->nodeId      = $this->utils->getObjectIdFromUrl($edusharing->object_url);
-//        $usageData->nodeVersion = $edusharing->object_version;
-//        try {
-//            $memento           = $DB->get_record('edusharing', ['id' => $edusharing->id], '*', MUST_EXIST);
-//            $usageData->ticket = $this->getTicket();
-//        } catch (Exception $exception) {
-//            unset($exception);
-//            return false;
-//        }
-//        try {
-//            $usage                = $this->createUsage($usageData);
-//            $edusharing->usage_id = $usage->usageId;
-//            $DB->update_record('edusharing', $edusharing);
-//        } catch (Exception $exception) {
-//            !empty($exception->getMessage()) && error_log($exception->getMessage());
-//            try {
-//                $DB->update_record('edusharing', $memento);
-//            } catch (Exception $updateException) {
-//                !empty($exception->getMessage()) && error_log($updateException->getMessage());
-//            }
-//            return false;
-//        }
-//        return true;
-//    }
+        return true;
+    }
 
     /**
      * Function postProcessEdusharingObject
@@ -254,30 +173,11 @@ class EduSharingService
      * @param int|null $updateTime
      * @return void
      */
-    private function postProcessEdusharingObject(ilObjLfEduSharingResource $edusharing, ?int $updateTime = null): void
+    private function postProcessEdusharingObject(ilObjLfEduSharingResource $edusharing): void
     {
-        if ($updateTime === null) {
-            $updateTime = time();
-        }
-//        global $COURSE;
-        if (empty($edusharing->timecreated)) {
-//            $edusharing->timecreated = $updateTime;//deprecated
-        }
-//        $edusharing->timeupdated = $updateTime;//deprecated
         if (!empty($edusharing->force_download)) {
             $edusharing->force_download = 1;
-//            $edusharing->popup_window   = 0;//deprecated
-        } else if (!empty($edusharing->popup_window)) {
-//            $edusharing->force_download = 0;//deprecated
-//            $edusharing->options        = '';//deprecated
-        } else {
-            if (empty($edusharing->blockdisplay)) {
-//                $edusharing->options = '';//deprecated
-            }
-//            $edusharing->popup_window = '';//deprecated
         }
-//        $edusharing->tracking = empty($edusharing->tracking) ? 0 : $edusharing->tracking;//deprecated
-        //added
         $course_id = $edusharing->getUpperCourse();
         if ($course_id == 0) {
             ilLoggerFactory::getLogger('xesr')->warning('set usage: no upper object ref id given.');
