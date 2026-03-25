@@ -1,7 +1,0 @@
-/vendor/
-/src/example/private.key
-/src/example/sample-app.properties.xml
-.idea/
-/data/
-/src/example/node_modules
-.env
