@@ -36,6 +36,7 @@ $payload = [
     'jwt' => $securedNode->jwt,
     'renderingBaseUrl' => $renderingUrl,
     'previewUrl' => $securedNode->previewUrl,
+    'signingAlgorithm' => $securedNode->signingAlgorithm,
 ];
 
 echo json_encode([

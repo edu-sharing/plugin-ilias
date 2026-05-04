@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderComponent.assets_url = repoUrl + '/web-components/rendering-service/assets';
         renderComponent.resource_url = redirectUrl;
         renderComponent.preview_url = node.data.previewUrl;
+        renderComponent.signature_algorithm = node.data.signingAlgorithm;
         element.innerHTML = "";
         element.removeAttribute('data-type');
         element.appendChild(renderComponent);

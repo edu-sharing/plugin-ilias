@@ -53,6 +53,7 @@ class EduSharingService
                 $nodeConfig       = new EduSharingNodeHelperConfig(new UrlHandling(true));
                 $this->nodeHelper = new EduSharingNodeHelper($baseHelper, $nodeConfig);
             }
+            $baseHelper->registerSignatureHandler(new ilLfEduSharingSignatureHandler($this->nodeHelper));
         }
     }
 
@@ -326,10 +327,20 @@ class EduSharingService
             version: $version
         );
         $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $resourceId;
+        $securedNode->signature  = $this->get_signing_algorithm();
         return $securedNode;
     }
 
     public function getPreview(Usage $usage): CurlResult {
         return $this->nodeHelper->getPreview($usage);
+    }
+
+    /**
+     * Function get_signing_algorithm
+     *
+     * @return string
+     */
+    public function get_signing_algorithm(): string {
+        return $this->nodeHelper->base->signatureHandler->getAlgorithm();
     }
 }
