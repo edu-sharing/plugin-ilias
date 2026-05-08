@@ -327,7 +327,6 @@ class EduSharingService
             version: $version
         );
         $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $resourceId;
-        $securedNode->signature  = $this->get_signing_algorithm();
         return $securedNode;
     }
 
