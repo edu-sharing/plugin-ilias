@@ -318,15 +318,9 @@ class EduSharingService
      * @throws JsonException
      * @throws Exception
      */
-    public function getSecuredNode(string $nodeId, string $resourceId, string $version): SecuredNode {
-        global $DIC;
-        $securedNode = $this->nodeHelper->getSecuredNode(
-            ticket: $this->getTicket(),
-            nodeId: $nodeId,
-            repoId: $this->utils->getConfigEntry('application_homerepid'),
-            version: $version
-        );
-        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $resourceId;
+    public function getSecuredNode(Usage $usage): SecuredNode {
+        $securedNode = $this->nodeHelper->getSecuredNodeByUsage($usage);
+        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $usage->resourceId;
         return $securedNode;
     }
 

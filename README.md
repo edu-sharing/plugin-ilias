@@ -1,7 +1,7 @@
 edu-sharing ILIAS plugin
 ===========================
 
-This extension is tested with ILIAS v9.5 and PHP 8.2.24
+This extension is tested with ILIAS v10 and PHP 8.2.24
 More information about edu-sharing can be found on the [edu-sharing homepage](http://www.edu-sharing.com).
 
 [Demo](http://stable.demo.edu-sharing.net/ilias/)

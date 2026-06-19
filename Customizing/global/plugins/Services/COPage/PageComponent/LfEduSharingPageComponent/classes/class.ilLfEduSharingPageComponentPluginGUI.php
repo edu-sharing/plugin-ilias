@@ -336,13 +336,14 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             $resourceId = $this->plugin->getResId();
             $nodeId = $this->utils->getObjectIdFromUrl($this->plugin->getUri());
             $version = $this->plugin->getObjectVersion();
+            $containerId = $this->plugin->getUpperCourse();
             $refId = $DIC->http()->wrapper()->query()->retrieve('ref_id', $DIC->refinery()->kindlyTo()->string());
             $redirectUrl = ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resourceId . '&ref_id=' . $refId;
             $nodeEndpoint = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/securedNode.php';
             $serviceWorker = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/serviceWorker.php';
             $float = $this->plugin->getWindowFloat() != 'no' ? 'style="float:'.$this->plugin->getWindowFloat().'"' : "";
             $container = <<<HTML
-            <div data-refid="{$refId}" data-redirecturl="{$redirectUrl}" data-endpoint="{$nodeEndpoint}" data-service-worker="{$serviceWorker}" data-resourceId="{$resourceId}" data-repo="{$repoUrl}" data-nodeId="{$nodeId}" data-version="{$version}" {$float} data-type="esObject"></div>
+            <div data-refid="{$refId}" data-redirecturl="{$redirectUrl}" data-endpoint="{$nodeEndpoint}" data-service-worker="{$serviceWorker}" data-resourceId="{$resourceId}" data-repo="{$repoUrl}" data-nodeId="{$nodeId}" data-version="{$version}" data-containerId="{$containerId}" {$float} data-type="esObject"></div>
             HTML;
             return $scripts . $styles . $container;
         }

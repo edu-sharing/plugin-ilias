@@ -15,9 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const repoUrl = element.getAttribute("data-repo");
         const nodeId = element.getAttribute("data-nodeid");
         const version = element.getAttribute("data-version");
+        const containerId = element.getAttribute("data-containerid");
         const nodeEndpoint = element.getAttribute("data-endpoint");
         const redirectUrl = element.getAttribute("data-redirecturl");
-        const nodeUrl = `${nodeEndpoint}?nodeId=${encodeURIComponent(nodeId)}&resourceId=${encodeURIComponent(resourceId)}&version=${encodeURIComponent(version)}`;
+        const nodeUrl = `${nodeEndpoint}?nodeId=${encodeURIComponent(nodeId)}&resourceId=${encodeURIComponent(resourceId)}&version=${encodeURIComponent(version)}&containerId=${encodeURIComponent(containerId)}`;
         const securedNodeResponse = await fetch(
             nodeUrl,
             {
