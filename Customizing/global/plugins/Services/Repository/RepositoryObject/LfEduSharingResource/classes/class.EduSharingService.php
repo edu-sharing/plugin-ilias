@@ -320,7 +320,7 @@ class EduSharingService
      */
     public function getSecuredNode(Usage $usage): SecuredNode {
         $securedNode = $this->nodeHelper->getSecuredNodeByUsage($usage);
-        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $usage->resourceId;
+        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $usage->resourceId . '&containerId=' . $usage->containerId;
         return $securedNode;
     }
 

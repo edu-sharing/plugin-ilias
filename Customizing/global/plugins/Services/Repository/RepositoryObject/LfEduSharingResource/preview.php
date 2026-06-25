@@ -11,18 +11,14 @@ ilContext::init(ilContext::CONTEXT_SCORM);
 require_once $ilias_root . '/components/ILIAS/Init/classes/class.ilInitialisation.php';
 ilInitialisation::initILIAS();
 
-global $DIC, $tree;
-
-$refId = $DIC->http()->wrapper()->query()->retrieve(
-    'ref_id',
-    $DIC->refinery()->kindlyTo()->int()
-);
-
-$parentRefId = $tree->getParentId($refId);
-$upperCourse = ilObject::_lookupObjId($parentRefId);
+global $DIC;
 
 $resourceId = (int) $DIC->http()->wrapper()->query()->retrieve(
     'resourceId',
+    $DIC->refinery()->kindlyTo()->int()
+);
+$containerId = (int) $DIC->http()->wrapper()->query()->retrieve(
+    'containerId',
     $DIC->refinery()->kindlyTo()->int()
 );
 $db = $DIC->database();
@@ -43,7 +39,7 @@ $service = new EduSharingService();
 $usage = new Usage(
     nodeId: $utils->getObjectIdFromUrl($objectUrl),
     nodeVersion: $version,
-    containerId: $upperCourse,
+    containerId: $containerId,
     resourceId: $resourceId,
     usageId: ""
 );
