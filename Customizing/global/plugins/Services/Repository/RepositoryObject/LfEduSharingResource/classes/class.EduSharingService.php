@@ -63,7 +63,14 @@ class EduSharingService
      * @throws Exception
      */
     public function createUsage(stdClass $usageData): Usage {
-        return $this->nodeHelper->createUsage(!empty($usageData->ticket) ? $usageData->ticket : $this->getTicket(), (string)$usageData->containerId, (string)$usageData->resourceId, (string)$usageData->nodeId, (string)$usageData->nodeVersion);
+        return $this->nodeHelper->createUsage(
+            ticket: !empty($usageData->ticket) ? $usageData->ticket : $this->getTicket(),
+            containerId: (string)$usageData->containerId,
+            resourceId: (string)$usageData->resourceId,
+            nodeId: (string)$usageData->nodeId,
+            nodeVersion: (string)$usageData->nodeVersion,
+            courseTitle: (string)$usageData->courseTitle
+        );
     }
 
     /**
@@ -161,6 +168,9 @@ class EduSharingService
         $usageData->resourceId  = $eduSharing->getId();//$id;
         $usageData->nodeId      = $this->utils->getObjectIdFromUrl($eduSharing->getUri()); //$eduSharing->object_url
         $usageData->nodeVersion = $eduSharing->object_version;
+        $usageData->courseTitle = $eduSharing->getUpperCourse() > 0
+            ? ilObject::_lookupTitle($eduSharing->getUpperCourse())
+            : '';
         $this->createUsage($usageData);
         $eduSharing->getId();//$id;
 
