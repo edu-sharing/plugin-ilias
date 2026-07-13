@@ -53,7 +53,7 @@ class EduSharingService
                 $nodeConfig       = new EduSharingNodeHelperConfig(new UrlHandling(true));
                 $this->nodeHelper = new EduSharingNodeHelper($baseHelper, $nodeConfig);
             }
-            $baseHelper->registerSignatureHandler(new ilLfEduSharingSignatureHandler($this->nodeHelper));
+            $baseHelper->registerAboutApiCacheHandler(new ilLfEduSharingAboutApiCacheHandler($this->nodeHelper));
         }
     }
 
@@ -303,7 +303,7 @@ class EduSharingService
      * @throws Exception
      */
     public function getRendering2Url(): string {
-        $about = $this->nodeHelper->base->getAbout();
+        $about = $this->nodeHelper->base->getAboutCached();
         if (isset($about['renderingService2']['url'])) {
             return $about['renderingService2']['url'];
         }
@@ -329,8 +329,9 @@ class EduSharingService
      * @throws Exception
      */
     public function getSecuredNode(Usage $usage): SecuredNode {
-        $securedNode = $this->nodeHelper->getSecuredNodeByUsage($usage);
+        $securedNode = $this->nodeHelper->getSecuredNodeByUsage($usage, $this->utils->getAuthKey());
         $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $usage->resourceId . '&containerId=' . $usage->containerId;
+        $securedNode->signingAlgorithm = $this->get_signing_algorithm();
         return $securedNode;
     }
 
@@ -344,6 +345,6 @@ class EduSharingService
      * @return string
      */
     public function get_signing_algorithm(): string {
-        return $this->nodeHelper->base->signatureHandler->getAlgorithm();
+        return $this->nodeHelper->base->getAlgorithm();
     }
 }
