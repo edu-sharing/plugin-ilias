@@ -113,6 +113,66 @@ class EduSharingService
     }
 
     /**
+     * Function getNodeAspects
+     *
+     * fetches the aspects of a node from the repository metadata endpoint
+     *
+     * @param string $nodeId
+     * @return array|null the aspects or null on error
+     */
+    public function getNodeAspects(string $nodeId): ?array {
+        try {
+            $headers = [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                $this->authHelper->getRESTAuthenticationHeader($this->getTicket())
+            ];
+            $url = rtrim($this->utils->getInternalUrl(), '/')
+                . '/rest/node/v1/nodes/-home-/' . rawurlencode($nodeId) . '/metadata?propertyFilter=-all-';
+            $result = $this->authHelper->base->handleCurlRequest($url, [
+                CURLOPT_FAILONERROR    => false,
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_HTTPHEADER     => $headers
+            ]);
+            if ($result->error !== 0 || (int)($result->info['http_code'] ?? 0) !== 200) {
+                ilLoggerFactory::getLogger('xesr')->warning(
+                    'Fetching node metadata failed for node ' . $nodeId . ' (http ' . ($result->info['http_code'] ?? 'n/a') . ')'
+                );
+                return null;
+            }
+            $data = json_decode($result->content, true, 512, JSON_THROW_ON_ERROR);
+            return $data['node']['aspects'] ?? null;
+        } catch (Exception $exception) {
+            ilLoggerFactory::getLogger('xesr')->warning(
+                'Fetching node metadata failed for node ' . $nodeId . ': ' . $exception->getMessage()
+            );
+            return null;
+        }
+    }
+
+    /**
+     * Function isVersioningRestricted
+     *
+     * versioning options are restricted for nodes without a version
+     * as well as published copies and collection references
+     *
+     * @param string $nodeId
+     * @param string|null $version
+     * @return bool
+     */
+    public function isVersioningRestricted(string $nodeId, ?string $version): bool {
+        if (empty($version) || $version === '-1') {
+            return true;
+        }
+        $aspects = $this->getNodeAspects($nodeId);
+        if ($aspects === null) {
+            return false;
+        }
+        return in_array('ccm:published', $aspects, true)
+            || in_array('ccm:collection_io_reference', $aspects, true);
+    }
+
+    /**
      * Function getTicket
      *
      * @throws Exception

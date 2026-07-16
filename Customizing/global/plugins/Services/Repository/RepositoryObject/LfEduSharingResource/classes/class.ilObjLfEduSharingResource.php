@@ -20,6 +20,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 	public int $window_height = 100;
 	public string $object_version = '0';
 	protected int $object_version_use_exact = 1;
+	protected int $version_restricted = 0;
 
 	protected bool $online = false;
 
@@ -82,6 +83,16 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		return $this->object_version_use_exact;
 	}
 
+	public function setVersionRestricted(int $a_val) : void
+	{
+		$this->version_restricted = $a_val;
+	}
+
+	public function getVersionRestricted() : int
+	{
+		return $this->version_restricted;
+	}
+
 	public function getObjectVersionForUse() : string
 	{
 		if ($this->object_version_use_exact == 0) {
@@ -116,6 +127,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 				'is_online' => array('integer', $this->getOnline()),
 				'object_version' => array('text', $this->getObjectVersion()),
 				'object_version_use_exact' => array('integer', $this->getObjectVersionUseExact()),
+				'version_restricted' => array('integer', $this->getVersionRestricted()),
 				'timecreated' => array('timestamp', date('Y-m-d H:i:s')),
 				'timemodified' => array('timestamp', date('Y-m-d H:i:s')),
 				'crs_ref_id' => array('integer', 0)
@@ -155,6 +167,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 			$this->setOnline((int) $row["is_online"]);
 			$this->setObjectVersion($row['object_version']);
 			$this->setObjectVersionUseExact($row['object_version_use_exact']);
+			$this->setVersionRestricted((int) ($row['version_restricted'] ?? 0));
 			// $this->set($row['timecreated']);
 			// $this->set($row['timemodified']);
 			$check_parent_obj_id = $row['parent_obj_id'];
@@ -228,6 +241,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 				'is_online' => array('integer', $this->getOnline()),
 				'object_version' => array('text', $this->getObjectVersion()),
 				'object_version_use_exact' => array('integer', $this->getObjectVersionUseExact()),
+				'version_restricted' => array('integer', $this->getVersionRestricted()),
 				'timemodified' => array('timestamp', date('Y-m-d H:i:s'))
 			),
 			array(
@@ -251,6 +265,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 		$new_obj->setUri($this->getUri());
 		$new_obj->setObjectVersion($this->getObjectVersion());
 		$new_obj->setObjectVersionUseExact($this->getObjectVersionUseExact());
+		$new_obj->setVersionRestricted($this->getVersionRestricted());
 		$new_obj->setOnline($this->getOnline());
 
 		global $DIC;
@@ -261,6 +276,7 @@ class ilObjLfEduSharingResource extends ilObjectPlugin //implements ilLPStatusPl
 				'edus_uri' => array('text', $this->getUri()),
 				'object_version' => array('text', $this->getObjectVersion()),
 				'object_version_use_exact' => array('integer', $this->getObjectVersionUseExact()),
+				'version_restricted' => array('integer', $this->getVersionRestricted()),
 				'is_online' => array('integer', $this->getOnline())//,
 				//				'timecreated' => array('timestamp', date('Y-m-d H:i:s')),
 				//				'timemodified' => array('timestamp', date('Y-m-d H:i:s'))

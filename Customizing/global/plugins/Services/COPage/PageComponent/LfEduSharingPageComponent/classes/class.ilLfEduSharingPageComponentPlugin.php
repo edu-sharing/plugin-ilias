@@ -14,6 +14,7 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
     protected string $mimetype = '';
     public string $object_version = '0';
     protected int $object_version_use_exact = 0;
+    protected int $version_restricted = 0;
     protected string $window_float = 'no';
     protected int $window_width_org = 200;
     protected int $window_height_org = 100;
@@ -142,6 +143,16 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
         return $this->object_version_use_exact;
     }
 
+    public function setVersionRestricted(int $a_val) : void
+    {
+        $this->version_restricted = $a_val;
+    }
+
+    public function getVersionRestricted() : int
+    {
+        return $this->version_restricted;
+    }
+
     public function getObjectVersionForUse() : string
     {
         if ($this->object_version_use_exact == 0) {
@@ -246,6 +257,7 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
             'mimetype' => ['text', $this->getMimetype()],
             'object_version' => ['text', $this->getObjectVersion()],
             'object_version_use_exact' => ['integer', $this->getObjectVersionUseExact()],
+            'version_restricted' => ['integer', $this->getVersionRestricted()],
             'window_float' => ['text', $this->getWindowFloat()],
             'window_width_org' => ['integer', $this->getWindowWidthOrg()],
             'window_height_org' => ['integer', $this->getWindowHeightOrg()],
@@ -276,6 +288,7 @@ class ilLfEduSharingPageComponentPlugin extends ilPageComponentPlugin
                 $this->setMimetype((string) $row['mimetype']);
                 $this->setObjectVersion((string) $row['object_version']);
                 $this->setObjectVersionUseExact((int) $row['object_version_use_exact']);
+                $this->setVersionRestricted((int) ($row['version_restricted'] ?? 0));
                 $this->setWindowFloat((string) $row['window_float']);
                 $this->setWindowWidthOrg((int) $row['window_width_org']);
                 $this->setWindowHeightOrg((int) $row['window_height_org']);

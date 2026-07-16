@@ -231,4 +231,16 @@ if (!$ilDB->tableColumnExists('rep_robj_xesp_usage', 'widget')) {
     ]);
 }
 ?>
+<#15>
+<?php
+if (!$ilDB->tableColumnExists('rep_robj_xesr_usage', 'version_restricted')) {
+    $ilDB->addTableColumn('rep_robj_xesr_usage', 'version_restricted',
+        array('type' => 'integer', 'length' => 1, 'notnull' => true, 'default' => 0) );
+}
+
+if (!$ilDB->tableColumnExists('rep_robj_xesp_usage', 'version_restricted')) {
+    $ilDB->addTableColumn('rep_robj_xesp_usage', 'version_restricted',
+        array('type' => 'integer', 'length' => 1, 'notnull' => true, 'default' => 0) );
+}
+?>
 

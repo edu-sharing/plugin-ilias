@@ -106,15 +106,31 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
         $this->plugin->setResId($resId);
 
         if (!$widgetMode) {
-            $eduuri = ilUtil::stripSlashes($DIC->http()->wrapper()->query()->retrieve("nodeId", $DIC->refinery()->kindlyTo()->string()));
+            $query = $DIC->http()->wrapper()->query();
+            $eduuri = ilUtil::stripSlashes($query->retrieve("nodeId", $DIC->refinery()->kindlyTo()->string()));
             $this->plugin->setUri($eduuri);
 
-            $this->plugin->setMimetype($DIC->http()->wrapper()->query()->retrieve("mimeType", $DIC->refinery()->kindlyTo()->string()));
-            $this->plugin->setObjectVersion($DIC->http()->wrapper()->query()->retrieve("v", $DIC->refinery()->kindlyTo()->string()));
-            $this->plugin->setWindowWidthOrg($DIC->http()->wrapper()->query()->retrieve("w", $DIC->refinery()->kindlyTo()->int()));
-            $this->plugin->setWindowHeightOrg($DIC->http()->wrapper()->query()->retrieve("h", $DIC->refinery()->kindlyTo()->int()));
-            $this->plugin->setWindowWidth($DIC->http()->wrapper()->query()->retrieve("w", $DIC->refinery()->kindlyTo()->int()));
-            $this->plugin->setWindowHeight($DIC->http()->wrapper()->query()->retrieve("h", $DIC->refinery()->kindlyTo()->int()));
+            if ($query->has("mimeType")) {
+                $this->plugin->setMimetype($query->retrieve("mimeType", $DIC->refinery()->kindlyTo()->string()));
+            }
+            // "v" is omitted by the repository for nodes without a version
+            $version = $query->has("v") ? $query->retrieve("v", $DIC->refinery()->kindlyTo()->string()) : '';
+            $this->plugin->setObjectVersion($version);
+            if ($query->has("w")) {
+                $this->plugin->setWindowWidthOrg($query->retrieve("w", $DIC->refinery()->kindlyTo()->int()));
+                $this->plugin->setWindowWidth($query->retrieve("w", $DIC->refinery()->kindlyTo()->int()));
+            }
+            if ($query->has("h")) {
+                $this->plugin->setWindowHeightOrg($query->retrieve("h", $DIC->refinery()->kindlyTo()->int()));
+                $this->plugin->setWindowHeight($query->retrieve("h", $DIC->refinery()->kindlyTo()->int()));
+            }
+
+            if ($this->service->isVersioningRestricted($this->utils->getObjectIdFromUrl($eduuri), $version)) {
+                $this->plugin->setVersionRestricted(1);
+                $this->plugin->setObjectVersionUseExact(0);
+            } else {
+                $this->plugin->setVersionRestricted(0);
+            }
 
             if ($this->plugin->updateUsage($resId) == true) {
                 $DIC->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt("msg_obj_created"), true);
@@ -192,7 +208,9 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 			$this->plugin->setWindowHeight($newHeight);
 		}
 		$this->plugin->setWindowFloat($DIC->http()->wrapper()->post()->retrieve('window_float', $DIC->refinery()->kindlyTo()->string()));
-        if ($DIC->http()->wrapper()->post()->has('object_version_use_exact')) {
+        if ($this->plugin->getVersionRestricted()) {
+            $this->plugin->setObjectVersionUseExact(0);
+        } elseif ($DIC->http()->wrapper()->post()->has('object_version_use_exact')) {
             $this->plugin->setObjectVersionUseExact($DIC->http()->wrapper()->post()->retrieve('object_version_use_exact',
                 $DIC->refinery()->kindlyTo()->int()));
         }
@@ -241,11 +259,14 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 			$ni->setValue($this->plugin->getWindowWidth());
 			$form->addItem($ni);
 		}
-		$cb = new ilCheckboxInputGUI($this->plugin->txt("object_version_use_exact"), "object_version_use_exact");
-		$cb->setValue("1");
-		$cb->setChecked($this->plugin->getObjectVersionUseExact());
-		$cb->setInfo($this->plugin->txt("object_version_use_exact_info").' '.$this->plugin->getObjectVersion());
-		$form->addItem($cb);
+		// version setting; not available for published copies and collection references
+		if (!$this->plugin->getVersionRestricted()) {
+			$cb = new ilCheckboxInputGUI($this->plugin->txt("object_version_use_exact"), "object_version_use_exact");
+			$cb->setValue("1");
+			$cb->setChecked($this->plugin->getObjectVersionUseExact());
+			$cb->setInfo($this->plugin->txt("object_version_use_exact_info").' '.$this->plugin->getObjectVersion());
+			$form->addItem($cb);
+		}
 
 		$radg = new ilRadioGroupInputGUI($this->plugin->txt("window_float"), "window_float");
 		$op0 = new ilRadioOption($this->plugin->txt("no_float"), "no");
@@ -335,7 +356,8 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             }
             $resourceId = $this->plugin->getResId();
             $nodeId = $this->utils->getObjectIdFromUrl($this->plugin->getUri());
-            $version = $this->plugin->getObjectVersion();
+            // respects object_version_use_exact: "0" (= latest) unless a version is pinned
+            $version = $this->plugin->getObjectVersionForUse();
             $containerId = $this->plugin->getUpperCourse();
             $refId = $DIC->http()->wrapper()->query()->retrieve('ref_id', $DIC->refinery()->kindlyTo()->string());
             $redirectUrl = ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resourceId . '&ref_id=' . $refId;
