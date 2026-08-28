@@ -9,6 +9,8 @@ More information about edu-sharing can be found on the [edu-sharing homepage](ht
 
 Installation
 ------------
+- Git clone this repository
+- Run git submodule update --init --recursive to install the API-Client library
 - Put the directory LfEduSharingResource into your ILIAS Customizing directory at: Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource (create all missing subdirectories)
 - Put the directory LfEduSharingPageComponent into your ILIAS Customizing directory at: Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent (create all missing subdirectories)
 - In your ILIAS home directory (usually /var/www/html/) run "composer du"
