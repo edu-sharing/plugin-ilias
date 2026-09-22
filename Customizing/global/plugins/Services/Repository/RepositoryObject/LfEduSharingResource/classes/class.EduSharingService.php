@@ -76,10 +76,17 @@ class EduSharingService
     /**
      * Function getUsageId
      *
-     * @throws Exception
+     * Returns null when no usage exists for the given parameters. The api client
+     * throws in that case, so the exception is translated here to keep the
+     * documented ?string contract callers rely on.
      */
     public function getUsageId(stdClass $usageData): ?string {
-        $usageId = $this->nodeHelper->getUsageIdByParameters($usageData->ticket, $usageData->nodeId, $usageData->containerId, $usageData->resourceId);
+        try {
+            $usageId = $this->nodeHelper->getUsageIdByParameters($usageData->ticket, $usageData->nodeId, $usageData->containerId, $usageData->resourceId);
+        } catch (Exception $exception) {
+            error_log('No usage found: ' . $exception->getMessage());
+            return null;
+        }
         if ($usageId == null) {
             error_log('No usage found');
         }
@@ -390,7 +397,7 @@ class EduSharingService
      */
     public function getSecuredNode(Usage $usage): SecuredNode {
         $securedNode = $this->nodeHelper->getSecuredNodeByUsage($usage, $this->utils->getAuthKey());
-        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $usage->resourceId . '&containerId=' . $usage->containerId;
+        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/preview.php?resourceId=' . $usage->resourceId . '&containerId=' . $usage->containerId;
         $securedNode->signingAlgorithm = $this->get_signing_algorithm();
         return $securedNode;
     }
