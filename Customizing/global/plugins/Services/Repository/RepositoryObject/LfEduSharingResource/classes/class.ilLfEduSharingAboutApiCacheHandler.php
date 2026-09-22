@@ -17,6 +17,10 @@ use ILIAS\Refinery\Custom\Transformation;
  * The class doubles as its own cache container Request; isForced() returns
  * true so the container is active without requiring per-container setup
  * activation, as recommended for plugins by the ILIAS Cache service.
+ *
+ * ILIAS 9's Cache\Container::set() takes no TTL argument (it was only added in
+ * ILIAS 10), so the expiry is kept by storing the fetch timestamp alongside the
+ * payload and treating an entry older than TTL as a miss.
  */
 class ilLfEduSharingAboutApiCacheHandler implements AboutApiCacheHandler, Request
 {
@@ -62,13 +66,17 @@ class ilLfEduSharingAboutApiCacheHandler implements AboutApiCacheHandler, Reques
         $cache = $DIC->globalCache()->get($this);
         if ($cache->has(self::CACHE_KEY)) {
             $cached = $cache->get(self::CACHE_KEY, new Transformation(static fn($data) => $data));
-            if (is_array($cached)) {
-                self::$requestCache = $cached;
-                return $cached;
+            if (is_array($cached)
+                && isset($cached['fetched_at'], $cached['about'])
+                && is_array($cached['about'])
+                && time() - (int) $cached['fetched_at'] < self::TTL
+            ) {
+                self::$requestCache = $cached['about'];
+                return $cached['about'];
             }
         }
         $about = $this->nodeHelper->base->getAbout();
-        $cache->set(self::CACHE_KEY, $about, self::TTL);
+        $cache->set(self::CACHE_KEY, ['fetched_at' => time(), 'about' => $about]);
         self::$requestCache = $about;
         return $about;
     }

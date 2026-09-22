@@ -2,13 +2,13 @@
 
 use EduSharingApiClient\Usage;
 
-$ilias_root = dirname(__DIR__, 8);
-require_once $ilias_root . '/vendor/composer/vendor/autoload.php';
+$ilias_root = dirname(__DIR__, 7);
+require_once $ilias_root . '/libs/composer/vendor/autoload.php';
 
-require_once $ilias_root . '/components/ILIAS/Context/classes/class.ilContext.php';
+require_once $ilias_root . '/Services/Context/classes/class.ilContext.php';
 ilContext::init(ilContext::CONTEXT_SCORM);
 
-require_once $ilias_root . '/components/ILIAS/Init/classes/class.ilInitialisation.php';
+require_once $ilias_root . '/Services/Init/classes/class.ilInitialisation.php';
 ilInitialisation::initILIAS();
 
 global $DIC;

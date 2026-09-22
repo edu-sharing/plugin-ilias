@@ -1,12 +1,16 @@
 <?php
 
-$ilias_root = dirname(__DIR__, 8);
-require_once $ilias_root . "/vendor/composer/vendor/autoload.php";
+$ilias_root = dirname(__DIR__, 7);
+require_once $ilias_root . "/libs/composer/vendor/autoload.php";
 
 header('Content-Type: text/javascript');
 header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 
+require_once $ilias_root . '/Services/Context/classes/class.ilContext.php';
+ilContext::init(ilContext::CONTEXT_SCORM);
+
+require_once $ilias_root . '/Services/Init/classes/class.ilInitialisation.php';
 ilInitialisation::initILIAS();
 $settings = new ilSetting("xedus");
 $proxy = ilProxySettings::_getInstance();
