@@ -20,3 +20,6 @@ float_left#:#Links, Text umfließend
 float_right#:#Rechts, Text umfließend
 not_visible_now#:#Die Ressource kann vorübergehend nicht angezeigt werden.
 failure_create#:#Das Einbinden der Ressource war nicht erfolgreich. Bitte löschen Sie diesen Inhalt.
+insert_widget#:#Widget einfügen
+widget_info#:#Hier können Sie alternativ ein edu-sharing-Widget einbinden (Sofern Ihr Repository dies unterstützt).
+widget_no_edit#:#Edu-sharing-Widgets können nicht bearbeitet werden.

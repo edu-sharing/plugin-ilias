@@ -221,3 +221,26 @@ if (!$ilDB->tableExists('rep_robj_xesr_users')) {
     $ilDB->addPrimaryKey('rep_robj_xesr_users', array('usr_id'));
 }
 ?>
+<#14>
+<?php
+if (!$ilDB->tableColumnExists('rep_robj_xesp_usage', 'widget')) {
+    $ilDB->addTableColumn('rep_robj_xesp_usage', 'widget', [
+            'type'    => 'text',
+            'notnull' => false,
+            'default' => null,
+    ]);
+}
+?>
+<#15>
+<?php
+if (!$ilDB->tableColumnExists('rep_robj_xesr_usage', 'version_restricted')) {
+    $ilDB->addTableColumn('rep_robj_xesr_usage', 'version_restricted',
+        array('type' => 'integer', 'length' => 1, 'notnull' => true, 'default' => 0) );
+}
+
+if (!$ilDB->tableColumnExists('rep_robj_xesp_usage', 'version_restricted')) {
+    $ilDB->addTableColumn('rep_robj_xesp_usage', 'version_restricted',
+        array('type' => 'integer', 'length' => 1, 'notnull' => true, 'default' => 0) );
+}
+?>
+

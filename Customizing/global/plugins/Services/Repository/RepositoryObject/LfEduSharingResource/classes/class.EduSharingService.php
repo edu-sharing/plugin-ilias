@@ -1,7 +1,5 @@
 <?php
 
-//namespace mod_edusharing;
-
 use EduSharingApiClient\CurlResult;
 use EduSharingApiClient\CurlHandler as EdusharingCurlHandler;
 use EduSharingApiClient\EduSharingAuthHelper;
@@ -9,12 +7,10 @@ use EduSharingApiClient\EduSharingHelperBase;
 use EduSharingApiClient\EduSharingNodeHelper;
 use EduSharingApiClient\EduSharingNodeHelperConfig;
 use EduSharingApiClient\NodeDeletedException;
+use EduSharingApiClient\SecuredNode;
 use EduSharingApiClient\UrlHandling;
 use EduSharingApiClient\Usage;
 use EduSharingApiClient\UsageDeletedException;
-//use Exception;
-//use JsonException;
-//use stdClass;
 
 class EduSharingService
 {
@@ -38,15 +34,12 @@ class EduSharingService
         $this->authHelper = $authHelper;
         $this->nodeHelper = $nodeHelper;
         $this->utils      = $utils;
-//        global $CFG;
-//        require_once($CFG->dirroot . '/mod/edusharing/eduSharingAutoloader.php');
         $this->init();
     }
 
     /**
      * Function init
      *
-//     * @throws dml_exception
      * @throws Exception
      */
     private function init(): void {
@@ -54,13 +47,13 @@ class EduSharingService
         if ($this->authHelper === null || $this->nodeHelper === null) {
             $internalUrl = $this->utils->getInternalUrl();
             $baseHelper  = new EduSharingHelperBase($internalUrl, $this->utils->getConfigEntry('application_private_key'), $this->utils->getConfigEntry('application_appid'));
-            //$baseHelper->registerCurlHandler(new EduSharingApiClient\DefaultCurlHandler());
             $baseHelper->registerCurlHandler(new ilLfEduSharingCurlHandler());
             $this->authHelper === null && $this->authHelper = new EduSharingAuthHelper($baseHelper);
             if ($this->nodeHelper === null) {
                 $nodeConfig       = new EduSharingNodeHelperConfig(new UrlHandling(true));
                 $this->nodeHelper = new EduSharingNodeHelper($baseHelper, $nodeConfig);
             }
+            $baseHelper->registerAboutApiCacheHandler(new ilLfEduSharingAboutApiCacheHandler($this->nodeHelper));
         }
     }
 
@@ -70,7 +63,14 @@ class EduSharingService
      * @throws Exception
      */
     public function createUsage(stdClass $usageData): Usage {
-        return $this->nodeHelper->createUsage(!empty($usageData->ticket) ? $usageData->ticket : $this->getTicket(), (string)$usageData->containerId, (string)$usageData->resourceId, (string)$usageData->nodeId, (string)$usageData->nodeVersion);
+        return $this->nodeHelper->createUsage(
+            ticket: !empty($usageData->ticket) ? $usageData->ticket : $this->getTicket(),
+            containerId: (string)$usageData->containerId,
+            resourceId: (string)$usageData->resourceId,
+            nodeId: (string)$usageData->nodeId,
+            nodeVersion: (string)$usageData->nodeVersion,
+            courseTitle: (string)$usageData->courseTitle
+        );
     }
 
     /**
@@ -113,31 +113,78 @@ class EduSharingService
     }
 
     /**
+     * Function getNodeAspects
+     *
+     * fetches the aspects of a node from the repository metadata endpoint
+     *
+     * @param string $nodeId
+     * @return array|null the aspects or null on error
+     */
+    public function getNodeAspects(string $nodeId): ?array {
+        try {
+            $headers = [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                $this->authHelper->getRESTAuthenticationHeader($this->getTicket())
+            ];
+            $url = rtrim($this->utils->getInternalUrl(), '/')
+                . '/rest/node/v1/nodes/-home-/' . rawurlencode($nodeId) . '/metadata?propertyFilter=-all-';
+            $result = $this->authHelper->base->handleCurlRequest($url, [
+                CURLOPT_FAILONERROR    => false,
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_HTTPHEADER     => $headers
+            ]);
+            if ($result->error !== 0 || (int)($result->info['http_code'] ?? 0) !== 200) {
+                ilLoggerFactory::getLogger('xesr')->warning(
+                    'Fetching node metadata failed for node ' . $nodeId . ' (http ' . ($result->info['http_code'] ?? 'n/a') . ')'
+                );
+                return null;
+            }
+            $data = json_decode($result->content, true, 512, JSON_THROW_ON_ERROR);
+            return $data['node']['aspects'] ?? null;
+        } catch (Exception $exception) {
+            ilLoggerFactory::getLogger('xesr')->warning(
+                'Fetching node metadata failed for node ' . $nodeId . ': ' . $exception->getMessage()
+            );
+            return null;
+        }
+    }
+
+    /**
+     * Function isVersioningRestricted
+     *
+     * versioning options are restricted for nodes without a version
+     * as well as published copies and collection references
+     *
+     * @param string $nodeId
+     * @param string|null $version
+     * @return bool
+     */
+    public function isVersioningRestricted(string $nodeId, ?string $version): bool {
+        if (empty($version) || $version === '-1') {
+            return true;
+        }
+        $aspects = $this->getNodeAspects($nodeId);
+        if ($aspects === null) {
+            return false;
+        }
+        return in_array('ccm:published', $aspects, true)
+            || in_array('ccm:collection_io_reference', $aspects, true);
+    }
+
+    /**
      * Function getTicket
      *
      * @throws Exception
      */
     public function getTicket(): string {
-        //ToDo remove user
         global $DIC;
-        $USER = $DIC->user();
-//        if (isset($USER->edusharing_userticket)) {
-//            if (isset($USER->edusharing_userticketvalidationts) && time() - $USER->edusharing_userticketvalidationts < 10) {
-//                return $USER->edusharing_userticket;
-//            }
-//            $ticketInfo = $this->authHelper->getTicketAuthenticationInfo($USER->edusharing_userticket);
-//            if ($ticketInfo['statusCode'] === 'OK') {
-//                $USER->edusharing_userticketvalidationts = time();
-//
-//                return $USER->edusharing_userticket;
-//            }
-//        }
         $additionalFields = null;
-        if ($this->utils->getConfigEntry('send_additional_auth') === '1' && $this->utils->getConfigEntry('edu_guest_option') != '1') {
+        if ($this->utils->getConfigEntry('edu_guest_option') != '1') {
             $additionalFields = [
-                'firstName' => $USER->getFirstname(),
-                'lastName'  => $USER->getLastname(),
-                'email'     => $USER->getEmail()
+                'firstName' => $DIC->user()->getFirstname(),
+                'lastName'  => $DIC->user()->getLastname(),
+                'email'     => $DIC->user()->getEmail()
             ];
         }
         return $this->authHelper->getTicketForUser($this->utils->getAuthKey(), $additionalFields);
@@ -165,99 +212,30 @@ class EduSharingService
     /**
      * Function addInstance
      */
-    public function addInstance(ilObjLfEduSharingResource $eduSharing, ?int $updateTime = null): bool
+    public function addInstance(ilObjLfEduSharingResource $eduSharing): bool
     {
         global $DIC;
 
-//        $eduSharing->timecreated  = $updateTime ?? time();//deprecated
-//        $eduSharing->timemodified = $updateTime ?? time();//deprecated
-
-        // You may have to add extra stuff in here.
-        $this->postProcessEdusharingObject($eduSharing, $updateTime);
+        $this->postProcessEdusharingObject($eduSharing);
 
         if ($DIC->http()->wrapper()->post()->has('object_version')
             && $DIC->http()->wrapper()->post()->retrieve('object_version', $DIC->refinery()->kindlyTo()->string()) != '0') {
             $eduSharing->object_version = $DIC->http()->wrapper()->post()->retrieve('object_version', $DIC->refinery()->kindlyTo()->string());
         }
-        //use simple version handling for atto plugin or legacy code
-//        if (isset($eduSharing->editor_atto)) {
-//            //avoid database error
-//            $eduSharing->introformat = 0;
-//        } else if (isset($eduSharing->window_versionshow) && $eduSharing->window_versionshow == 'current') {
-//            $eduSharing->object_version = $eduSharing->window_version;
-//        }
-//        try {
-//            $id = $DB->insert_record('edusharing', $eduSharing);
-//        } catch (Exception $exception) {
-//            error_log($exception->getMessage());
-//            return false;
-//        }
-
 
         $usageData              = new stdClass();
         $usageData->containerId = $eduSharing->getUpperCourse();
         $usageData->resourceId  = $eduSharing->getId();//$id;
         $usageData->nodeId      = $this->utils->getObjectIdFromUrl($eduSharing->getUri()); //$eduSharing->object_url
         $usageData->nodeVersion = $eduSharing->object_version;
-//        try {
-            $usage                = $this->createUsage($usageData);
-//            $eduSharing->id       = $eduSharing->getId();//$id;
-            $id = $eduSharing->getId();//$id;
-//            $eduSharing->usage_id = $usage->usageId;//deprecated
-//            $DB->update_record('edusharing', $eduSharing);
-            return true;
-//        } catch (Exception $exception) {
-//            !empty($exception->getMessage()) && error_log($exception->getMessage());
-//            try {
-//                $DB->delete_records('edusharing', ['id' => $eduSharing->getId()]);//$id]);
-//            } catch (Exception $deleteException) {
-//                error_log($deleteException->getMessage());
-//            }
-//            return false;
-//        }
-    }
+        $usageData->courseTitle = $eduSharing->getUpperCourse() > 0
+            ? ilObject::_lookupTitle($eduSharing->getUpperCourse())
+            : '';
+        $this->createUsage($usageData);
+        $eduSharing->getId();//$id;
 
-//    /**
-//     * Function updateInstance
-//     *
-//     * @param stdClass $edusharing
-//     * @param int|null $updateTime
-//     * @return bool
-//     */
-//    public function updateInstance(stdClass $edusharing, ?int $updateTime = null): bool {
-//        global $DB;
-//        // FIX: when editing a moodle-course-module the $edusharing->id will be named $edusharing->instance
-//        if (!empty($edusharing->instance)) {
-//            $edusharing->id = $edusharing->instance;
-//        }
-//        $this->postProcessEdusharingObject($edusharing, $updateTime);
-//        $usageData              = new stdClass();
-//        $usageData->containerId = $edusharing->course;
-//        $usageData->resourceId  = $edusharing->id;
-//        $usageData->nodeId      = $this->utils->getObjectIdFromUrl($edusharing->object_url);
-//        $usageData->nodeVersion = $edusharing->object_version;
-//        try {
-//            $memento           = $DB->get_record('edusharing', ['id' => $edusharing->id], '*', MUST_EXIST);
-//            $usageData->ticket = $this->getTicket();
-//        } catch (Exception $exception) {
-//            unset($exception);
-//            return false;
-//        }
-//        try {
-//            $usage                = $this->createUsage($usageData);
-//            $edusharing->usage_id = $usage->usageId;
-//            $DB->update_record('edusharing', $edusharing);
-//        } catch (Exception $exception) {
-//            !empty($exception->getMessage()) && error_log($exception->getMessage());
-//            try {
-//                $DB->update_record('edusharing', $memento);
-//            } catch (Exception $updateException) {
-//                !empty($exception->getMessage()) && error_log($updateException->getMessage());
-//            }
-//            return false;
-//        }
-//        return true;
-//    }
+        return true;
+    }
 
     /**
      * Function postProcessEdusharingObject
@@ -266,30 +244,11 @@ class EduSharingService
      * @param int|null $updateTime
      * @return void
      */
-    private function postProcessEdusharingObject(ilObjLfEduSharingResource $edusharing, ?int $updateTime = null): void
+    private function postProcessEdusharingObject(ilObjLfEduSharingResource $edusharing): void
     {
-        if ($updateTime === null) {
-            $updateTime = time();
-        }
-//        global $COURSE;
-        if (empty($edusharing->timecreated)) {
-//            $edusharing->timecreated = $updateTime;//deprecated
-        }
-//        $edusharing->timeupdated = $updateTime;//deprecated
         if (!empty($edusharing->force_download)) {
             $edusharing->force_download = 1;
-//            $edusharing->popup_window   = 0;//deprecated
-        } else if (!empty($edusharing->popup_window)) {
-//            $edusharing->force_download = 0;//deprecated
-//            $edusharing->options        = '';//deprecated
-        } else {
-            if (empty($edusharing->blockdisplay)) {
-//                $edusharing->options = '';//deprecated
-            }
-//            $edusharing->popup_window = '';//deprecated
         }
-//        $edusharing->tracking = empty($edusharing->tracking) ? 0 : $edusharing->tracking;//deprecated
-        //added
         $course_id = $edusharing->getUpperCourse();
         if ($course_id == 0) {
             ilLoggerFactory::getLogger('xesr')->warning('set usage: no upper object ref id given.');
@@ -399,18 +358,53 @@ class EduSharingService
         return $result->content;
     }
 
-//    /**
-//     * Function requireEduLogin
-//     *
-//     * @throws require_login_exception
-//     * @throws coding_exception
-//     * @throws moodle_exception
-//     * @throws Exception
-//     */
-//    public function requireEduLogin(?int $courseId = null, bool $checkTicket = true, bool $checkSessionKey = true): void {
-//        require_login($courseId);
-//        $checkSessionKey && require_sesskey();
-//        $checkTicket && $this->getTicket();
-//    }
+    /**
+     * @throws JsonException
+     * @throws Exception
+     */
+    public function getRendering2Url(): string {
+        $about = $this->nodeHelper->base->getAboutCached();
+        if (isset($about['renderingService2']['url'])) {
+            return $about['renderingService2']['url'];
+        }
+        throw new Exception('Rendering Service 2 is not configured');
+    }
 
+    /**
+     * hasRendering2
+     *
+     * @return bool
+     */
+    public function hasRendering2(): bool {
+        try {
+            $this->getRendering2Url();
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @throws JsonException
+     * @throws Exception
+     */
+    public function getSecuredNode(Usage $usage): SecuredNode {
+        $securedNode = $this->nodeHelper->getSecuredNodeByUsage($usage, $this->utils->getAuthKey());
+        $securedNode->previewUrl = ILIAS_HTTP_PATH . '/preview.php?resourceId=' . $usage->resourceId . '&containerId=' . $usage->containerId;
+        $securedNode->signingAlgorithm = $this->get_signing_algorithm();
+        return $securedNode;
+    }
+
+    public function getPreview(Usage $usage): CurlResult {
+        return $this->nodeHelper->getPreview($usage);
+    }
+
+    /**
+     * Function get_signing_algorithm
+     *
+     * @return string
+     */
+    public function get_signing_algorithm(): string {
+        return $this->nodeHelper->base->getAlgorithm();
+    }
 }

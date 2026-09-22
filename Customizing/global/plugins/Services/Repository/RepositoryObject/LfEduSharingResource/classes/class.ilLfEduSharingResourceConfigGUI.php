@@ -83,7 +83,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		// settings object for EduSharing
 		$settings = new ilSetting("xedus");
 
-		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
+		//include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
 
 		$ti = new ilTextInputGUI($this->pl->txt("metadata_endpoint"), "metadata_endpoint");
@@ -245,7 +245,7 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$iliasDomainRep = str_replace('/', '', $iliasDomain) . CLIENT_ID;
 		$iliasDomain .= ';' . CLIENT_ID;
 
-		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
+		//include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
 
 		$sh = new ilFormSectionHeaderGUI();

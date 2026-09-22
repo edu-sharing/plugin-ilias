@@ -184,11 +184,13 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		$cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
 		$this->form->addItem($cb);
 
-		// version setting
-		$cb = new ilCheckboxInputGUI($this->plugin->txt("object_version_use_exact"), "object_version_use_exact");
-		$cb->setValue("1");
-		$cb->setInfo($this->plugin->txt("object_version_use_exact_info") . ' ' . $this->object->getObjectVersion());
-		$this->form->addItem($cb);
+		// version setting; not available for published copies and collection references
+		if (!$this->object->getVersionRestricted()) {
+			$cb = new ilCheckboxInputGUI($this->plugin->txt("object_version_use_exact"), "object_version_use_exact");
+			$cb->setValue("1");
+			$cb->setInfo($this->plugin->txt("object_version_use_exact_info") . ' ' . $this->object->getObjectVersion());
+			$this->form->addItem($cb);
+		}
 
 		// uri
 		$ne = new ilNonEditableValueGUI($this->lng->txt("uri"), "uri");
@@ -226,7 +228,9 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->setOnline((int) $this->form->getInput("online"));
-			$this->object->setObjectVersionUseExact((int) $this->form->getInput("object_version_use_exact"));
+			$this->object->setObjectVersionUseExact(
+				$this->object->getVersionRestricted() ? 0 : (int) $this->form->getInput("object_version_use_exact")
+			);
 			$this->object->update();
 			$DIC->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt("msg_obj_modified"), true);
 			$DIC->ctrl()->redirect($this, "editProperties");
@@ -307,8 +311,16 @@ class ilObjLfEduSharingResourceGUI extends ilObjectPluginGUI
 		try {
 			$new_uri = ilUtil::stripSlashes($_REQUEST["nodeId"]);
 			$this->object->setUri($new_uri);
-			$version = ilUtil::stripSlashes($_REQUEST["v"]);//query
+			$version = ilUtil::stripSlashes($_REQUEST["v"] ?? '');//query, absent for nodes without version
 			$this->object->setObjectVersion($version);
+			$service = new EduSharingService();
+			$utils = new EduSharingUtilityFunctions();
+			if ($service->isVersioningRestricted($utils->getObjectIdFromUrl($new_uri), $version)) {
+				$this->object->setVersionRestricted(1);
+				$this->object->setObjectVersionUseExact(0);
+			} else {
+				$this->object->setVersionRestricted(0);
+			}
 			$this->object->update();
 		} catch (Exception $e) {
 			$DIC->ui()->mainTemplate()->setOnScreenMessage('failure', $this->formatException($e), true);

@@ -1,0 +1,3 @@
+[submodule "Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/apiClient"]
+	path = Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/apiClient
+	url = https://github.com/edu-sharing/php-auth-plugin.git
