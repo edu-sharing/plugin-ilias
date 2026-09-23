@@ -263,7 +263,7 @@ class EduSharingUtilityFunctions
      */
     public function getConfigEntry(string $name): string { //Todo: mixed
         $settings = new ilSetting("xedus");
-        return $settings->get($name);
+        return $settings->get($name) ?? '';
     }
 
     /**

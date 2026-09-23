@@ -1,6 +1,7 @@
 <?php
 
 $ilias_root = dirname(__DIR__, 7);
+chdir($ilias_root);
 require_once $ilias_root . "/libs/composer/vendor/autoload.php";
 
 header('Content-Type: text/javascript');
@@ -13,6 +14,10 @@ ilContext::init(ilContext::CONTEXT_SCORM);
 require_once $ilias_root . '/Services/Init/classes/class.ilInitialisation.php';
 ilInitialisation::initILIAS();
 $settings = new ilSetting("xedus");
+if ($settings->get('service_worker_enabled') != '1') {
+    http_response_code(404);
+    exit;
+}
 $proxy = ilProxySettings::_getInstance();
 $internalUrl = $settings->get('application_cc_gui_url');
 $curlOptions = [];

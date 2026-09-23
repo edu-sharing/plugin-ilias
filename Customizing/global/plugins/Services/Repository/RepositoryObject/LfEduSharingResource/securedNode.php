@@ -3,6 +3,7 @@
 use EduSharingApiClient\Usage;
 
 $ilias_root = dirname(__DIR__, 7);
+chdir($ilias_root);
 require_once $ilias_root . '/libs/composer/vendor/autoload.php';
 
 require_once $ilias_root . '/Services/Context/classes/class.ilContext.php';

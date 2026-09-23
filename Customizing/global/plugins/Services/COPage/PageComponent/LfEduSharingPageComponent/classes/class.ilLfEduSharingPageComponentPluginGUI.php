@@ -348,7 +348,9 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
                 }
                 $webComponentUrl = $repoUrl . '/web-components/rendering-service/main.js';
                 $scripts .= '<script type="module" src="' . $webComponentUrl . '"></script>';
-                $eduJs = '<script type="text/javascript" src="./Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/js/edu.js"></script>';
+                // versioned so browsers pick up changes instead of a cached copy
+                $eduJsVersion = (string) @filemtime(dirname(__DIR__) . '/js/edu.js');
+                $eduJs = '<script type="text/javascript" src="./Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/js/edu.js?v=' . $eduJsVersion . '"></script>';
                 $scripts .= $eduJs;
                 $webComponentCss = $repoUrl . '/web-components/rendering-service/styles.css';
                 $styles .= '<link rel="stylesheet" href="' . $webComponentCss . '">';
@@ -362,10 +364,20 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             $refId = $DIC->http()->wrapper()->query()->retrieve('ref_id', $DIC->refinery()->kindlyTo()->string());
             $redirectUrl = ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resourceId . '&ref_id=' . $refId;
             $nodeEndpoint = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/securedNode.php';
-            $serviceWorker = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/serviceWorker.php';
-            $float = $this->plugin->getWindowFloat() != 'no' ? 'style="float:'.$this->plugin->getWindowFloat().'"' : "";
+            // opt-in via plugin config; an empty value makes edu.js unregister a previously installed worker
+            $serviceWorker = $this->utils->getConfigEntry('service_worker_enabled') == '1'
+                ? ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/serviceWorker.php'
+                : '';
+            $css = '';
+            if ($this->plugin->getWindowFloat() != 'no') {
+                $css .= 'float:' . $this->plugin->getWindowFloat() . ';';
+            }
+            if ($this->plugin->getWindowWidthOrg() > 0 && $this->plugin->getWindowWidth() > 0) {
+                $css .= 'width:' . (int) $this->plugin->getWindowWidth() . 'px;max-width:100%;';
+            }
+            $style = $css !== '' ? 'style="' . $css . '"' : '';
             $container = <<<HTML
-            <div data-refid="{$refId}" data-redirecturl="{$redirectUrl}" data-endpoint="{$nodeEndpoint}" data-service-worker="{$serviceWorker}" data-resourceId="{$resourceId}" data-repo="{$repoUrl}" data-nodeId="{$nodeId}" data-version="{$version}" data-containerId="{$containerId}" {$float} data-type="esObject"></div>
+            <div data-refid="{$refId}" data-redirecturl="{$redirectUrl}" data-endpoint="{$nodeEndpoint}" data-service-worker="{$serviceWorker}" data-resourceId="{$resourceId}" data-repo="{$repoUrl}" data-nodeId="{$nodeId}" data-version="{$version}" data-containerId="{$containerId}" {$style} data-type="esObject"></div>
             HTML;
             return $scripts . $styles . $container;
         }

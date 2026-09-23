@@ -7,6 +7,7 @@
 //use ILIAS\ilContext;
 
 $ilias_root = dirname(__DIR__, 7);
+chdir($ilias_root);
 require_once $ilias_root . "/libs/composer/vendor/autoload.php";
 
 /**

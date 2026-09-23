@@ -124,3 +124,5 @@ no_resource_set#:#Keine Ressource wurde ausgewählt. Die Einstellungen sollten b
 send_additional_auth#:#Übermittlung zusätzlicher Authentifizierungsinfos
 send_additional_auth_info#:#Ist diese Option aktiviert, werden bei der app auth Anfrage Vor- und Nachname sowie E-Mail-Addresse übermittelt.
 error_get_zoerr_auth#:#Die ZOERR-Authentifizierung misslang wegen fehlender Daten. Ersatzweise wird der Gastzugang verwendet.
+service_worker_enabled#:#Service Worker für das Rendering verwenden
+service_worker_enabled_info#:#Standard: Nein. Ist diese Option aktiviert, registrieren Browser beim Anzeigen von edu-sharing-Inhalten den Service Worker des edu-sharing-Renderings (Gültigkeitsbereich: gesamte ILIAS-Installation). Ist sie deaktiviert, werden bereits registrierte Service Worker beim nächsten Seitenaufruf entfernt.

@@ -1,15 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
     /**
+     * Removes a rendering service worker registered while the config option was enabled
+     */
+    const unregisterServiceWorker = async () => {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+            const worker = registration.active || registration.waiting || registration.installing;
+            if (worker && worker.scriptURL.includes("/LfEduSharingResource/serviceWorker.php")) {
+                await registration.unregister();
+            }
+        }
+    };
+
+    /**
      * @param {Element} element
      */
     const renderObject = async (element) => {
 
         const serviceWorkerUrl = element.getAttribute("data-service-worker");
         if ('serviceWorker' in navigator) {
-            await navigator.serviceWorker.register(serviceWorkerUrl, {
-                scope: '/'
-            });
-            await navigator.serviceWorker.ready;
+            if (serviceWorkerUrl) {
+                await navigator.serviceWorker.register(serviceWorkerUrl, {
+                    scope: '/'
+                });
+                await navigator.serviceWorker.ready;
+            } else {
+                await unregisterServiceWorker();
+            }
         }
         const resourceId = element.getAttribute("data-resourceid");
         const repoUrl = element.getAttribute("data-repo");
