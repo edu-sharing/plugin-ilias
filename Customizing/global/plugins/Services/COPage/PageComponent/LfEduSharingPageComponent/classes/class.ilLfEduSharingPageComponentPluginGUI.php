@@ -147,7 +147,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
                 $DIC->ui()->mainTemplate()->setOnScreenMessage('failure', "Create failed (usageResult = false)", true);
                 $this->returnToParent();
             }
-            $this->edit();
+            $this->redirectToEdit();
         } else {
             // Widget mode
             $widgetAttributes = $this->parseWidgetAttributes($widget);
@@ -190,6 +190,23 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
 	}
 
 	/**
+	 * Open the settings of the element just created. The page editor finds elements by
+	 * hier_id/pc_id, which still point to the insert position during create, so a form
+	 * rendered in that request is dropped on submit.
+	 */
+	protected function redirectToEdit(): void
+	{
+		$pcGui = $this->getPCGUI();
+		$page = $pcGui->getPage();
+		$page->stripHierIDs();
+		$page->addHierIDs();
+		$content = $pcGui->getContentObject();
+		$this->ctrl->setParameterByClass(ilPCPluggedGUI::class, 'hier_id', $content->readHierId());
+		$this->ctrl->setParameterByClass(ilPCPluggedGUI::class, 'pc_id', $content->readPCId());
+		$this->ctrl->redirectByClass(ilPCPluggedGUI::class, 'edit');
+	}
+
+	/**
 	 * Update
 	 */
 	public function update()
@@ -216,6 +233,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
         }
 		if ($this->plugin->updateUsage($resId) == true) {
             $DIC->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt("msg_obj_modified"), true);
+            $this->returnToParent();
 		}
         $form = $this->editform();
 		$this->tpl->setContent($form->getHTML());
