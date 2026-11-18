@@ -7,7 +7,10 @@ header('Content-Type: text/javascript');
 header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 
-ilInitialisation::initILIAS();
+// ILIAS 11: initILIAS() no longer sets up the Refinery / UI framework itself; the
+// legacy adapter entry point builds a fresh $DIC with them and then calls initILIAS().
+require_once $ilias_root . '/artifacts/bootstrap_default.php';
+entry_point('ILIAS Legacy Initialisation Adapter');
 $settings = new ilSetting("xedus");
 $proxy = ilProxySettings::_getInstance();
 $internalUrl = $settings->get('application_cc_gui_url');

@@ -5,11 +5,12 @@ use EduSharingApiClient\Usage;
 $ilias_root = dirname(__DIR__, 8);
 require_once $ilias_root . '/vendor/composer/vendor/autoload.php';
 
-require_once $ilias_root . '/components/ILIAS/Context/classes/class.ilContext.php';
 ilContext::init(ilContext::CONTEXT_SCORM);
 
-require_once $ilias_root . '/components/ILIAS/Init/classes/class.ilInitialisation.php';
-ilInitialisation::initILIAS();
+// ILIAS 11: initILIAS() no longer sets up the Refinery / UI framework itself; the
+// legacy adapter entry point builds a fresh $DIC with them and then calls initILIAS().
+require_once $ilias_root . '/artifacts/bootstrap_default.php';
+entry_point('ILIAS Legacy Initialisation Adapter');
 
 global $DIC;
 

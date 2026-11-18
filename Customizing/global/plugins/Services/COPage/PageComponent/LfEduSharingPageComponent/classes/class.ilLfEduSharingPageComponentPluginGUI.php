@@ -335,7 +335,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             $widgetStyles = '';
             if (!$widgetLoaded) {
                 if (!$renderingLoaded) {
-                    $inlineEnv = "window.__env = {EDU_SHARING_API_URL: `${repoUrl}/rest`};";
+                    $inlineEnv = "window.__env = {EDU_SHARING_API_URL: `{$repoUrl}/rest`};";
                     $inlineScript = '<script type="text/javascript">' . $inlineEnv . '</script>';
                     $widgetScripts .= $inlineScript;
                 }
@@ -360,7 +360,7 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             if (!$renderingLoaded) {
                 // Inject JS and css only once
                 if (!$widgetLoaded) {
-                    $inlineEnv = "window.__env = {EDU_SHARING_API_URL: `${repoUrl}/rest`};";
+                    $inlineEnv = "window.__env = {EDU_SHARING_API_URL: `{$repoUrl}/rest`};";
                     $inlineScript = '<script type="text/javascript">' . $inlineEnv . '</script>';
                     $scripts .= $inlineScript;
                 }
