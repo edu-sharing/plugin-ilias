@@ -380,7 +380,10 @@ class ilLfEduSharingPageComponentPluginGUI extends ilPageComponentPluginGUI {
             $refId = $DIC->http()->wrapper()->query()->retrieve('ref_id', $DIC->refinery()->kindlyTo()->string());
             $redirectUrl = ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/COPage/PageComponent/LfEduSharingPageComponent/inlineHelper.php?resId=" . $resourceId . '&ref_id=' . $refId;
             $nodeEndpoint = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/securedNode.php';
-            $serviceWorker = ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/serviceWorker.php';
+            // opt-in (plugin configuration): an empty URL tells edu.js not to register it
+            $serviceWorker = (new ilSetting("xedus"))->get('service_worker_enabled', '0') === '1'
+                ? ILIAS_HTTP_PATH . '/Customizing/global/plugins/Services/Repository/RepositoryObject/LfEduSharingResource/serviceWorker.php'
+                : '';
             $css = '';
             if ($this->plugin->getWindowFloat() != 'no') {
                 $css .= 'float:' . $this->plugin->getWindowFloat() . ';';

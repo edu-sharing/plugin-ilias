@@ -1,16 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
+    let serviceWorkerSetUp = null;
+    /**
+     * The service worker is opt-in (plugin configuration). With a URL it is registered once
+     * per page; without one, a registration left over from an earlier opt-in is removed.
+     * Failures are logged but never block rendering.
+     * @param {string|null} serviceWorkerUrl
+     */
+    const setUpServiceWorker = (serviceWorkerUrl) => {
+        if (!('serviceWorker' in navigator)) {
+            return Promise.resolve();
+        }
+        if (serviceWorkerSetUp === null) {
+            serviceWorkerSetUp = (async () => {
+                if (serviceWorkerUrl) {
+                    await navigator.serviceWorker.register(serviceWorkerUrl, {
+                        scope: '/'
+                    });
+                    await navigator.serviceWorker.ready;
+                    return;
+                }
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const registration of registrations) {
+                    const worker = registration.active || registration.waiting || registration.installing;
+                    if (worker && worker.scriptURL.includes('/LfEduSharingResource/serviceWorker.php')) {
+                        await registration.unregister();
+                    }
+                }
+            })().catch(error => console.error(error));
+        }
+        return serviceWorkerSetUp;
+    };
     /**
      * @param {Element} element
      */
     const renderObject = async (element) => {
 
-        const serviceWorkerUrl = element.getAttribute("data-service-worker");
-        if ('serviceWorker' in navigator) {
-            await navigator.serviceWorker.register(serviceWorkerUrl, {
-                scope: '/'
-            });
-            await navigator.serviceWorker.ready;
-        }
+        await setUpServiceWorker(element.getAttribute("data-service-worker"));
         const resourceId = element.getAttribute("data-resourceid");
         const repoUrl = element.getAttribute("data-repo");
         const nodeId = element.getAttribute("data-nodeid");

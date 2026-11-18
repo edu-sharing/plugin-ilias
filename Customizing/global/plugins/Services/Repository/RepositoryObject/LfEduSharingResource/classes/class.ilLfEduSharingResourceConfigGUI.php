@@ -439,6 +439,18 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 		$form->addItem($cb);
 
 		$sh = new ilFormSectionHeaderGUI();
+		$sh->setTitle($this->pl->txt('rendering_properties'));
+		$form->addItem($sh);
+
+		$cb = new ilCheckboxInputGUI($this->pl->txt('service_worker_enabled'), 'service_worker_enabled');
+		$cb->setInfo($this->pl->txt('service_worker_enabled_info'));
+		$cb->setValue('1');
+		if ($settings->get('service_worker_enabled', '0') === '1') {
+			$cb->setChecked(true);
+		}
+		$form->addItem($cb);
+
+		$sh = new ilFormSectionHeaderGUI();
 		$sh->setTitle($this->pl->txt('guest_properties'));
 		$form->addItem($sh);
 
@@ -511,6 +523,8 @@ class ilLfEduSharingResourceConfigGUI extends ilPluginConfigGUI
 			if ($form->getInput('EDU_AUTH_KEY') == 'randomUId') {
 				$settings->set('send_additional_auth', '0');
 			}
+
+			$settings->set('service_worker_enabled', $form->getInput('service_worker_enabled') ? '1' : '0');
 
 			$settings->set('edu_guest_option', $form->getInput('edu_guest_option'));
 			$settings->set('edu_guest_guest_id', $form->getInput('edu_guest_guest_id'));

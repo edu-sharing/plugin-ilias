@@ -124,3 +124,6 @@ no_resource_set#:#No resource was set. The settings for this object should be ch
 send_additional_auth#:#Send additional auth information
 send_additional_auth_info#:#If checked, the app authentication request will include the first and last name as well as email address.
 error_get_zoerr_auth#:#ZOERR authentication failed due to missing data. Guest access is used instead.
+rendering_properties#:#Rendering
+service_worker_enabled#:#Activate service worker
+service_worker_enabled_info#:#Standard: no; Registers the edu-sharing rendering service worker for the whole ILIAS site (scope /). It is not needed for normal rendering; only activate it if your edu-sharing repository requires it.
